@@ -58,3 +58,12 @@ In the terminal, run this command in the root folder of this repo:
 # Builds and uploads the app into the Flipper
 ufbt launch
 ```
+
+## Roadmap
+
+- Backup of the last 5 manifest.txt file before changing them
+- Animation previewer screen
+
+## License
+
+MIT © 2026 SLK
