@@ -9,3 +9,10 @@
 #define FAS_MAX_PLAYLISTS      64
 #define FAS_PLAYLIST_NAME_LEN  32
 #define FAS_PATH_LEN          160
+
+/* ── Default animation values ─────────────────────────────────────────── */
+#define FAS_DEFAULT_MIN_BUTTHURT  0
+#define FAS_DEFAULT_MAX_BUTTHURT 14
+#define FAS_DEFAULT_MIN_LEVEL     1
+#define FAS_DEFAULT_MAX_LEVEL    30
+#define FAS_DEFAULT_WEIGHT        3
