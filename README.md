@@ -7,7 +7,7 @@ background animations play on your Flipper.
 ## Features
 
 | Feature | Description |
-|---|---||
+|---|---|
 | **Create Playlist** | Select any subset of animations on your Flipper, optionally fine-tune per-animation settings, then save as a named playlist. |
 | **Choose Playlist** | Apply a playlist (overwrites `manifest.txt`). A reboot prompt appears to activate the changes. |
 | **Delete Playlist** | Remove any saved playlists. |
@@ -17,7 +17,7 @@ background animations play on your Flipper.
 ## Controls
 
 | Screen | Button | Action |
-|---|---|---||
+|---|---|---|
 | Create Playlist | ↑ / ↓ | Navigate items |
 | Create Playlist | OK (short) | Toggle checkbox |
 | Create Playlist | OK (long) | Edit min/max butthurt, level & weight |
@@ -31,7 +31,7 @@ background animations play on your Flipper.
 When an animation is added without editing its per-animation settings, these defaults are applied:
 
 | Setting | Default |
-|---|---||
+|---|---|
 | Min Butthurt | 0 |
 | Max Butthurt | 14 |
 | Min Level | 1 |
@@ -41,7 +41,7 @@ When an animation is added without editing its per-animation settings, these def
 ## File Locations
 
 | Path | Contents |
-|---|---||
+|---|---|
 | `/ext/dolphin/` | Animation folders (read-only by this app) |
 | `/ext/dolphin/manifest.txt` | Active animation manifest (overwritten on Apply) |
 | `/ext/apps_data/flipper_animation_switcher/` | Saved playlist `.txt` files |
