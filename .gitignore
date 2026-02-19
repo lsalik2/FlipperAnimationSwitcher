@@ -53,3 +53,12 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# Distribution files
+dist/
+
+# Virtual environment
+.venv/
+
+# VSCode configs
+.vscode/
