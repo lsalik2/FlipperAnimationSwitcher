@@ -73,3 +73,32 @@ static FasApp* fas_app_alloc(void) {
 
     return app;
 }
+
+static void fas_app_free(FasApp* app) {
+    /* Remove views before freeing them */
+    view_dispatcher_remove_view(app->view_dispatcher, FasViewMenu);
+    menu_free(app->menu);
+
+    view_dispatcher_remove_view(app->view_dispatcher, FasViewList);
+    fas_list_view_free(app->list_view);
+
+    view_dispatcher_remove_view(app->view_dispatcher, FasViewVarList);
+    variable_item_list_free(app->var_list);
+
+    view_dispatcher_remove_view(app->view_dispatcher, FasViewTextInput);
+    text_input_free(app->text_input);
+
+    view_dispatcher_remove_view(app->view_dispatcher, FasViewWidget);
+    widget_free(app->widget);
+
+    view_dispatcher_remove_view(app->view_dispatcher, FasViewDialogEx);
+    dialog_ex_free(app->dialog_ex);
+
+    view_dispatcher_free(app->view_dispatcher);
+    scene_manager_free(app->scene_manager);
+
+    furi_record_close(RECORD_STORAGE);
+    furi_record_close(RECORD_GUI);
+
+    free(app);
+}
