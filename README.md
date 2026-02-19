@@ -37,3 +37,11 @@ When an animation is added without editing its per-animation settings, these def
 | Min Level | 1 |
 | Max Level | 30 |
 | Weight | 3 |
+
+## File Locations
+
+| Path | Contents |
+|---|---||
+| `/ext/dolphin/` | Animation folders (read-only by this app) |
+| `/ext/dolphin/manifest.txt` | Active animation manifest (overwritten on Apply) |
+| `/ext/apps_data/flipper_animation_switcher/` | Saved playlist `.txt` files |
