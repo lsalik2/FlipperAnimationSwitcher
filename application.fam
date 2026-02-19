@@ -1,0 +1,9 @@
+App(
+    appid="flipper_animation_switcher",
+    name="Animation Switcher",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="fas_app_entry",
+    requires=["gui", "storage"],
+    stack_size=4 * 1024,
+    fap_category="Tools",
+)
