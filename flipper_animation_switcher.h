@@ -2,3 +2,10 @@
 #define FAS_DOLPHIN_PATH   "/ext/dolphin"
 #define FAS_PLAYLISTS_PATH "/ext/apps_data/flipper_animation_switcher"
 #define FAS_MANIFEST_PATH  "/ext/dolphin/manifest.txt"
+
+/* ── Limits ───────────────────────────────────────────────────────────── */
+#define FAS_MAX_ANIMATIONS    128 // TODO Maybe increase this if possible?
+#define FAS_ANIM_NAME_LEN      64
+#define FAS_MAX_PLAYLISTS      64
+#define FAS_PLAYLIST_NAME_LEN  32
+#define FAS_PATH_LEN          160
