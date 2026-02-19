@@ -1,3 +1,20 @@
+#pragma once
+
+#include <furi.h>
+#include <furi_hal.h>
+#include <gui/gui.h>
+#include <gui/view.h>
+#include <gui/view_dispatcher.h>
+#include <gui/scene_manager.h>
+#include <gui/modules/menu.h>
+#include <gui/modules/variable_item_list.h>
+#include <gui/modules/text_input.h>
+#include <gui/modules/widget.h>
+#include <gui/modules/dialog_ex.h>
+#include <storage/storage.h>
+
+#include "views/fas_list_view.h"
+
 /* ── Filesystem paths ─────────────────────────────────────────────────── */
 #define FAS_DOLPHIN_PATH   "/ext/dolphin"
 #define FAS_PLAYLISTS_PATH "/ext/apps_data/flipper_animation_switcher"
@@ -60,3 +77,35 @@ typedef enum {
     FasEvtMainDelete,
     FasEvtMainAbout,
 } FasCustomEvent;
+
+/* ── Application context ──────────────────────────────────────────────── */
+typedef struct {
+    Gui*        gui;
+    Storage*    storage;
+    SceneManager*    scene_manager;
+    ViewDispatcher*  view_dispatcher;
+
+    /* Views */
+    Menu*              menu;
+    FasListView*       list_view;
+    VariableItemList*  var_list;
+    TextInput*         text_input;
+    Widget*            widget;
+    DialogEx*          dialog_ex;
+
+    /* Animation data (loaded from /ext/dolphin) */
+    AnimEntry animations[FAS_MAX_ANIMATIONS];
+    int        animation_count;
+    int        current_anim_index;   /* index of animation being edited */
+
+    /* Playlist data (loaded from apps_data folder) */
+    PlaylistEntry playlists[FAS_MAX_PLAYLISTS];
+    int           playlist_count;
+    int           current_playlist_index;
+
+    /* TextInput work buffer */
+    char text_input_buffer[FAS_PLAYLIST_NAME_LEN];
+
+    /* Flag: true when returning to AnimList scene from AnimSettings */
+    bool returning_from_settings;
+} FasApp;
