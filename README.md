@@ -2,7 +2,7 @@
 
 A Flipper Zero application that lets you create, manage, and switch between
 **animation playlists** — template `manifest.txt` files that control which
-background animations play on your Flipper.
+background animations play on your Flipper. Currently supports up to 128 animations.
 
 ## Features
 
@@ -63,6 +63,8 @@ ufbt launch
 
 - Backup of the last 5 manifest.txt file before changing them
 - Animation previewer screen
+- Increase total animation size
+- Add help screen with controls in About section
 
 ## License
 
