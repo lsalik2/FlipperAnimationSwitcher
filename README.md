@@ -13,3 +13,15 @@ background animations play on your Flipper.
 | **Delete Playlist** | Remove any saved playlists. |
 | **Preview** | Long-press any playlist to see which animations it contains. |
 | **About / Help** | Version info and repo link. |
+
+## Controls
+
+| Screen | Button | Action |
+|---|---|---||
+| Create Playlist | ↑ / ↓ | Navigate items |
+| Create Playlist | OK (short) | Toggle checkbox |
+| Create Playlist | OK (long) | Edit min/max butthurt, level & weight |
+| Create Playlist | → | Proceed to name-entry |
+| Create Playlist (after long press) | ← / → | Adjust value |
+| Choose Playlist | OK (short) | Select / confirm |
+| Choose Playlist | OK (long) | Preview animations in that playlist |
