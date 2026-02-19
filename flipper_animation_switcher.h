@@ -31,3 +31,13 @@ typedef struct {
 typedef struct {
     char name[FAS_PLAYLIST_NAME_LEN];
 } PlaylistEntry;
+
+/* ── View IDs ─────────────────────────────────────────────────────────── */
+typedef enum {
+    FasViewMenu,      /* Main menu (Menu module)          */
+    FasViewList,      /* Custom FasListView               */
+    FasViewVarList,   /* VariableItemList (anim settings) */
+    FasViewTextInput, /* TextInput (playlist name)        */
+    FasViewWidget,    /* Widget (about, preview)          */
+    FasViewDialogEx,  /* DialogEx (confirmations)         */
+} FasView;
