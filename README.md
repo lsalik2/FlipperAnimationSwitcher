@@ -45,3 +45,16 @@ When an animation is added without editing its per-animation settings, these def
 | `/ext/dolphin/` | Animation folders (read-only by this app) |
 | `/ext/dolphin/manifest.txt` | Active animation manifest (overwritten on Apply) |
 | `/ext/apps_data/flipper_animation_switcher/` | Saved playlist `.txt` files |
+
+## Building
+
+This app targets the **official Flipper Zero firmware**. Most custom firmware should be supported however.
+
+Install `ufbt`, instructions available from its official [GitHub page](https://github.com/flipperdevices/flipperzero-ufbt)
+
+In the terminal, run this command in the root folder of this repo:
+
+```bash
+# Builds and uploads the app into the Flipper
+ufbt launch
+```
