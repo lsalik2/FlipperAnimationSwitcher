@@ -9,3 +9,6 @@ typedef enum {
     FasSceneCount,
 } FasScene;
 #undef ADD_SCENE
+
+/* ── Handler table (defined in fas_scene.c) ───────────────────────────── */
+extern const SceneManagerHandlers fas_scene_handlers;
