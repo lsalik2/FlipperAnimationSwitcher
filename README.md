@@ -25,3 +25,15 @@ background animations play on your Flipper.
 | Create Playlist (after long press) | ← / → | Adjust value |
 | Choose Playlist | OK (short) | Select / confirm |
 | Choose Playlist | OK (long) | Preview animations in that playlist |
+
+## Default Animation Values
+
+When an animation is added without editing its per-animation settings, these defaults are applied:
+
+| Setting | Default |
+|---|---||
+| Min Butthurt | 0 |
+| Max Butthurt | 14 |
+| Min Level | 1 |
+| Max Level | 30 |
+| Weight | 3 |
