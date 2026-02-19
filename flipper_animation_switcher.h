@@ -41,3 +41,22 @@ typedef enum {
     FasViewWidget,    /* Widget (about, preview)          */
     FasViewDialogEx,  /* DialogEx (confirmations)         */
 } FasView;
+
+/* ── Custom events sent through the view dispatcher ──────────────────── */
+typedef enum {
+    FasEvtAnimListOpenSettings = 0,
+    FasEvtAnimListDone,
+    FasEvtPlaylistNameDone,
+    FasEvtChooseSelect,
+    FasEvtChoosePreview,
+    FasEvtDeleteSelect,
+    FasEvtDeletePreview,
+    FasEvtDeleteYes,
+    FasEvtDeleteNo,
+    FasEvtRebootYes,
+    FasEvtRebootNo,
+    FasEvtMainCreate,
+    FasEvtMainChoose,
+    FasEvtMainDelete,
+    FasEvtMainAbout,
+} FasCustomEvent;
