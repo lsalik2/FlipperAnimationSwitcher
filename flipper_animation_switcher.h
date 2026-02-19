@@ -16,3 +16,18 @@
 #define FAS_DEFAULT_MIN_LEVEL     1
 #define FAS_DEFAULT_MAX_LEVEL    30
 #define FAS_DEFAULT_WEIGHT        3
+
+/* ── Data structures ──────────────────────────────────────────────────── */
+typedef struct {
+    char name[FAS_ANIM_NAME_LEN];
+    bool selected;
+    int  min_butthurt;
+    int  max_butthurt;
+    int  min_level;
+    int  max_level;
+    int  weight;
+} AnimEntry;
+
+typedef struct {
+    char name[FAS_PLAYLIST_NAME_LEN];
+} PlaylistEntry;
