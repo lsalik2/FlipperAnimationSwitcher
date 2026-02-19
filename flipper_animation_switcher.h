@@ -109,3 +109,11 @@ typedef struct {
     /* Flag: true when returning to AnimList scene from AnimSettings */
     bool returning_from_settings;
 } FasApp;
+
+/* ── Storage helpers (implemented in flipper_animation_switcher.c) ────── */
+void fas_ensure_playlists_dir(FasApp* app);
+bool fas_load_animations(FasApp* app);
+bool fas_load_playlists(FasApp* app);
+bool fas_save_playlist(FasApp* app, const char* name);
+bool fas_delete_playlist(FasApp* app, int index);
+bool fas_apply_playlist(FasApp* app, int index);
