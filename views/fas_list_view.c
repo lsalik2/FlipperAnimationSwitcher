@@ -145,3 +145,23 @@ static bool fas_list_input(InputEvent* event, void* context) {
         if(cb) cb(cb_ctx, cursor, FasListEvtOkShort);
         consumed = true;
     }
+
+    /* ── OK long: fire callback (no checkbox toggle) ──────────────────── */
+    if(event->type == InputTypeLong && event->key == InputKeyOk) {
+        int             cursor = 0;
+        FasListCallback cb     = NULL;
+        void*           cb_ctx = NULL;
+
+        with_view_model(
+            lv->view,
+            FasListViewModel * m,
+            {
+                cursor = m->cursor;
+                cb     = m->callback;
+                cb_ctx = m->callback_ctx;
+            },
+            false);
+
+        if(cb) cb(cb_ctx, cursor, FasListEvtOkLong);
+        consumed = true;
+    }
