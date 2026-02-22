@@ -263,3 +263,13 @@ void fas_list_view_set_checked(FasListView* lv, int index, bool checked) {
         },
         true);
 }
+
+bool fas_list_view_get_checked(FasListView* lv, int index) {
+    bool result = false;
+    with_view_model(
+        lv->view,
+        FasListViewModel * m,
+        { if(index >= 0 && index < m->count) result = m->checked[index]; },
+        false);
+    return result;
+}
