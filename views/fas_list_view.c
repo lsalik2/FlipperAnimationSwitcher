@@ -279,3 +279,19 @@ int fas_list_view_get_cursor(FasListView* lv) {
     with_view_model(lv->view, FasListViewModel * m, { c = m->cursor; }, false);
     return c;
 }
+
+void fas_list_view_set_cursor(FasListView* lv, int index) {
+    with_view_model(
+        lv->view,
+        FasListViewModel * m,
+        {
+            if(index >= 0 && index < m->count) {
+                m->cursor = index;
+                /* Adjust scroll so cursor is visible */
+                if(m->cursor < m->scroll) m->scroll = m->cursor;
+                if(m->cursor >= m->scroll + VISIBLE_ROWS)
+                    m->scroll = m->cursor - VISIBLE_ROWS + 1;
+            }
+        },
+        true);
+}
