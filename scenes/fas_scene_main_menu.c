@@ -13,3 +13,13 @@ static void fas_main_menu_cb(void* context, uint32_t index) {
     FasApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, (uint32_t)index);
 }
+
+void fas_scene_main_menu_on_enter(void* context) {
+    FasApp* app = context;
+    menu_reset(app->menu);
+    menu_add_item(app->menu, "Create Playlist", NULL, FasMainIdxCreate,  fas_main_menu_cb, app);
+    menu_add_item(app->menu, "Choose Playlist", NULL, FasMainIdxChoose,  fas_main_menu_cb, app);
+    menu_add_item(app->menu, "Delete Playlist", NULL, FasMainIdxDelete,  fas_main_menu_cb, app);
+    menu_add_item(app->menu, "About / Help",    NULL, FasMainIdxAbout,   fas_main_menu_cb, app);
+    view_dispatcher_switch_to_view(app->view_dispatcher, FasViewMenu);
+}
