@@ -27,3 +27,9 @@ View*        fas_list_view_get_view(FasListView* lv);
 void fas_list_view_set_callback(FasListView* lv, FasListCallback cb, void* ctx);
 void fas_list_view_reset(FasListView* lv);
 void fas_list_view_add_item(FasListView* lv, const char* label, bool has_checkbox, bool checked);
+
+/* State accessors */
+void fas_list_view_set_checked(FasListView* lv, int index, bool checked);
+bool fas_list_view_get_checked(FasListView* lv, int index);
+int  fas_list_view_get_cursor(FasListView* lv);
+void fas_list_view_set_cursor(FasListView* lv, int index);
