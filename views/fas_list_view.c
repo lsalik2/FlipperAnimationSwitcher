@@ -209,3 +209,7 @@ void fas_list_view_free(FasListView* lv) {
     view_free(lv->view);
     free(lv);
 }
+
+View* fas_list_view_get_view(FasListView* lv) {
+    return lv->view;
+}
