@@ -8,7 +8,6 @@ typedef enum {
     FasMainIdxAbout,
 } FasMainMenuIdx;
 
-
 static void fas_main_menu_cb(void* context, uint32_t index) {
     FasApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, (uint32_t)index);
@@ -51,4 +50,9 @@ bool fas_scene_main_menu_on_event(void* context, SceneManagerEvent event) {
         }
     }
     return consumed;
+}
+
+void fas_scene_main_menu_on_exit(void* context) {
+    FasApp* app = context;
+    menu_reset(app->menu);
 }
