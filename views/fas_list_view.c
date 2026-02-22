@@ -122,3 +122,26 @@ static bool fas_list_input(InputEvent* event, void* context) {
             consumed = true;
         }
     }
+
+    /* ── OK short: toggle checkbox, fire callback ─────────────────────── */
+    if(event->type == InputTypeShort && event->key == InputKeyOk) {
+        int             cursor = 0;
+        FasListCallback cb     = NULL;
+        void*           cb_ctx = NULL;
+
+        with_view_model(
+            lv->view,
+            FasListViewModel * m,
+            {
+                cursor = m->cursor;
+                cb     = m->callback;
+                cb_ctx = m->callback_ctx;
+                if(m->count > 0 && m->has_checkbox[m->cursor]) {
+                    m->checked[m->cursor] = !m->checked[m->cursor];
+                }
+            },
+            true);
+
+        if(cb) cb(cb_ctx, cursor, FasListEvtOkShort);
+        consumed = true;
+    }
