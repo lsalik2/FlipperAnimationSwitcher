@@ -92,3 +92,33 @@ static void fas_list_draw(Canvas* canvas, void* model_ptr) {
 static bool fas_list_input(InputEvent* event, void* context) {
     FasListView* lv = context;
     bool consumed   = false;
+
+    /* ── Navigation (short + repeat for smooth scrolling) ─────────────── */
+    if((event->type == InputTypeShort || event->type == InputTypeRepeat)) {
+        if(event->key == InputKeyUp) {
+            with_view_model(
+                lv->view,
+                FasListViewModel * m,
+                {
+                    if(m->cursor > 0) {
+                        m->cursor--;
+                        if(m->cursor < m->scroll) m->scroll = m->cursor;
+                    }
+                },
+                true);
+            consumed = true;
+        } else if(event->key == InputKeyDown) {
+            with_view_model(
+                lv->view,
+                FasListViewModel * m,
+                {
+                    if(m->cursor < m->count - 1) {
+                        m->cursor++;
+                        if(m->cursor >= m->scroll + VISIBLE_ROWS)
+                            m->scroll = m->cursor - VISIBLE_ROWS + 1;
+                    }
+                },
+                true);
+            consumed = true;
+        }
+    }
