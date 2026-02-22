@@ -23,3 +23,32 @@ void fas_scene_main_menu_on_enter(void* context) {
     menu_add_item(app->menu, "About / Help",    NULL, FasMainIdxAbout,   fas_main_menu_cb, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, FasViewMenu);
 }
+
+bool fas_scene_main_menu_on_event(void* context, SceneManagerEvent event) {
+    FasApp* app      = context;
+    bool    consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        switch(event.event) {
+        case FasMainIdxCreate:
+            scene_manager_next_scene(app->scene_manager, FasSceneAnimList);
+            consumed = true;
+            break;
+        case FasMainIdxChoose:
+            scene_manager_next_scene(app->scene_manager, FasSceneChoosePlaylist);
+            consumed = true;
+            break;
+        case FasMainIdxDelete:
+            scene_manager_next_scene(app->scene_manager, FasSceneDeletePlaylist);
+            consumed = true;
+            break;
+        case FasMainIdxAbout:
+            scene_manager_next_scene(app->scene_manager, FasSceneAbout);
+            consumed = true;
+            break;
+        default:
+            break;
+        }
+    }
+    return consumed;
+}
