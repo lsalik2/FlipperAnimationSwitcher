@@ -188,3 +188,19 @@ static bool fas_list_input(InputEvent* event, void* context) {
 
     return consumed;
 }
+
+/* ── Public API ───────────────────────────────────────────────────────── */
+
+FasListView* fas_list_view_alloc(void) {
+    FasListView* lv = malloc(sizeof(FasListView));
+    lv->view        = view_alloc();
+    view_allocate_model(lv->view, ViewModelTypeLocking, sizeof(FasListViewModel));
+    view_set_draw_callback(lv->view, fas_list_draw);
+    view_set_input_callback(lv->view, fas_list_input);
+    view_set_context(lv->view, lv);
+
+    with_view_model(
+        lv->view, FasListViewModel * m, { memset(m, 0, sizeof(FasListViewModel)); }, false);
+
+    return lv;
+}
