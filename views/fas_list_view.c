@@ -224,3 +224,15 @@ void fas_list_view_set_callback(FasListView* lv, FasListCallback cb, void* ctx) 
         },
         false);
 }
+
+void fas_list_view_reset(FasListView* lv) {
+    with_view_model(
+        lv->view,
+        FasListViewModel * m,
+        {
+            m->count  = 0;
+            m->cursor = 0;
+            m->scroll = 0;
+        },
+        true);
+}
