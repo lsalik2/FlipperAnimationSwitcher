@@ -213,3 +213,14 @@ void fas_list_view_free(FasListView* lv) {
 View* fas_list_view_get_view(FasListView* lv) {
     return lv->view;
 }
+
+void fas_list_view_set_callback(FasListView* lv, FasListCallback cb, void* ctx) {
+    with_view_model(
+        lv->view,
+        FasListViewModel * m,
+        {
+            m->callback     = cb;
+            m->callback_ctx = ctx;
+        },
+        false);
+}
