@@ -204,3 +204,8 @@ FasListView* fas_list_view_alloc(void) {
 
     return lv;
 }
+
+void fas_list_view_free(FasListView* lv) {
+    view_free(lv->view);
+    free(lv);
+}
