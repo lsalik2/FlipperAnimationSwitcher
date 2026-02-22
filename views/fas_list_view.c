@@ -273,3 +273,9 @@ bool fas_list_view_get_checked(FasListView* lv, int index) {
         false);
     return result;
 }
+
+int fas_list_view_get_cursor(FasListView* lv) {
+    int c = 0;
+    with_view_model(lv->view, FasListViewModel * m, { c = m->cursor; }, false);
+    return c;
+}
