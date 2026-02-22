@@ -22,3 +22,8 @@ typedef struct FasListView FasListView;
 FasListView* fas_list_view_alloc(void);
 void         fas_list_view_free(FasListView* lv);
 View*        fas_list_view_get_view(FasListView* lv);
+
+/* Configuration */
+void fas_list_view_set_callback(FasListView* lv, FasListCallback cb, void* ctx);
+void fas_list_view_reset(FasListView* lv);
+void fas_list_view_add_item(FasListView* lv, const char* label, bool has_checkbox, bool checked);
