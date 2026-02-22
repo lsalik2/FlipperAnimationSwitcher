@@ -13,3 +13,12 @@ typedef enum {
     FasListEvtOkLong,   /* OK held                                          */
     FasListEvtRight,    /* Right arrow pressed                              */
 } FasListEvent;
+
+typedef void (*FasListCallback)(void* context, int index, FasListEvent event);
+
+typedef struct FasListView FasListView;
+
+/* Lifecycle */
+FasListView* fas_list_view_alloc(void);
+void         fas_list_view_free(FasListView* lv);
+View*        fas_list_view_get_view(FasListView* lv);
