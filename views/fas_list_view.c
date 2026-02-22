@@ -236,3 +236,20 @@ void fas_list_view_reset(FasListView* lv) {
         },
         true);
 }
+
+void fas_list_view_add_item(FasListView* lv, const char* label, bool has_checkbox, bool checked) {
+    with_view_model(
+        lv->view,
+        FasListViewModel * m,
+        {
+            if(m->count < FAS_LIST_MAX_ITEMS) {
+                int i = m->count;
+                strncpy(m->labels[i], label, FAS_LIST_LABEL_LEN - 1);
+                m->labels[i][FAS_LIST_LABEL_LEN - 1] = '\0';
+                m->has_checkbox[i]                    = has_checkbox;
+                m->checked[i]                         = checked;
+                m->count++;
+            }
+        },
+        true);
+}
