@@ -87,3 +87,8 @@ static void fas_list_draw(Canvas* canvas, void* model_ptr) {
         canvas_draw_str(canvas, 120, 60, "v");
     }
 }
+
+/* ── Input ────────────────────────────────────────────────────────────── */
+static bool fas_list_input(InputEvent* event, void* context) {
+    FasListView* lv = context;
+    bool consumed   = false;
