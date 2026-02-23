@@ -270,3 +270,23 @@ bool fas_apply_playlist(FasApp* app, int index) {
     FS_Error err = storage_common_copy(app->storage, src, FAS_MANIFEST_PATH);
     return (err == FSE_OK);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * Entry point
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+int32_t fas_app_entry(void* p) {
+    UNUSED(p);
+
+    FasApp* app = fas_app_alloc();
+    fas_ensure_playlists_dir(app);
+
+    /* Start at the main menu */
+    scene_manager_next_scene(app->scene_manager, FasSceneMainMenu);
+
+    /* Blocks until the user exits (back from main menu) */
+    view_dispatcher_run(app->view_dispatcher);
+
+    fas_app_free(app);
+    return 0;
+}
