@@ -1,6 +1,6 @@
-#include "../flipper_animation_switcher.h"
+#include "../animation_switcher.h"
 #include "fas_scene.h"
-#include "flipper_animation_switcher_icons.h"
+#include "animation_switcher_icons.h"
 
 typedef enum {
     FasMainIdxCreate = 0,

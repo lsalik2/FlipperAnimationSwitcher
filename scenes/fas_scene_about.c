@@ -1,4 +1,4 @@
-#include "../flipper_animation_switcher.h"
+#include "../animation_switcher.h"
 #include "fas_scene.h"
 
 #define FAS_VERSION   "1.0.0"

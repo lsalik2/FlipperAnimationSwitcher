@@ -1,4 +1,4 @@
-#include "../flipper_animation_switcher.h"
+#include "../animation_switcher.h"
 #include "fas_scene.h"
 
 /* ── Read the playlist .txt and build a display string ─────────────────── */

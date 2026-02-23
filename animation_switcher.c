@@ -1,4 +1,4 @@
-#include "flipper_animation_switcher.h"
+#include "animation_switcher.h"
 #include "scenes/fas_scene.h"
 
 #include <string.h>

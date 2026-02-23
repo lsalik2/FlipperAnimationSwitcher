@@ -1,4 +1,4 @@
-#include "../flipper_animation_switcher.h"
+#include "../animation_switcher.h"
 #include "fas_scene.h"
 
 static void fas_text_input_done_cb(void* context) {

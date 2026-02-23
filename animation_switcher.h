@@ -12,12 +12,11 @@
 #include <gui/modules/widget.h>
 #include <gui/modules/dialog_ex.h>
 #include <storage/storage.h>
-
 #include "views/fas_list_view.h"
 
 /* ── Filesystem paths ─────────────────────────────────────────────────── */
 #define FAS_DOLPHIN_PATH   "/ext/dolphin"
-#define FAS_PLAYLISTS_PATH "/ext/apps_data/flipper_animation_switcher"
+#define FAS_PLAYLISTS_PATH "/ext/apps_data/animation_switcher"
 #define FAS_MANIFEST_PATH  "/ext/dolphin/manifest.txt"
 
 /* ── Limits ───────────────────────────────────────────────────────────── */
@@ -110,7 +109,7 @@ typedef struct {
     bool returning_from_settings;
 } FasApp;
 
-/* ── Storage helpers (implemented in flipper_animation_switcher.c) ────── */
+/* ── Storage helpers (implemented in animation_switcher.c) ────── */
 void fas_ensure_playlists_dir(FasApp* app);
 bool fas_load_animations(FasApp* app);
 bool fas_load_playlists(FasApp* app);
