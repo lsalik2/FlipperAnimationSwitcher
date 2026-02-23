@@ -102,3 +102,11 @@ static void fas_app_free(FasApp* app) {
 
     free(app);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * Storage helpers
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+void fas_ensure_playlists_dir(FasApp* app) {
+    storage_simply_mkdir(app->storage, FAS_PLAYLISTS_PATH);
+}
