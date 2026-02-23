@@ -30,3 +30,33 @@ void fas_scene_delete_confirm_on_enter(void* context) {
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FasViewDialogEx);
 }
+
+bool fas_scene_delete_confirm_on_event(void* context, SceneManagerEvent event) {
+    FasApp* app      = context;
+    bool    consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        switch(event.event) {
+        case FasEvtDeleteYes:
+            fas_delete_playlist(app, app->current_playlist_index);
+            /* Pop back to the delete-playlist list so it reloads */
+            scene_manager_previous_scene(app->scene_manager);
+            consumed = true;
+            break;
+
+        case FasEvtDeleteNo:
+            scene_manager_previous_scene(app->scene_manager);
+            consumed = true;
+            break;
+
+        default:
+            break;
+        }
+    }
+    return consumed;
+}
+
+void fas_scene_delete_confirm_on_exit(void* context) {
+    FasApp* app = context;
+    dialog_ex_reset(app->dialog_ex);
+}
