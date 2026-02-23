@@ -27,3 +27,35 @@ void fas_scene_reboot_confirm_on_enter(void* context) {
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FasViewDialogEx);
 }
+
+bool fas_scene_reboot_confirm_on_event(void* context, SceneManagerEvent event) {
+    FasApp* app      = context;
+    bool    consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        switch(event.event) {
+
+        case FasEvtRebootYes:
+            /* Hard reset — the Flipper will restart and pick up the new manifest */
+            furi_hal_power_reset();
+            consumed = true;
+            break;
+
+        case FasEvtRebootNo:
+            /* Go back to main menu without rebooting */
+            scene_manager_search_and_switch_to_previous_scene(
+                app->scene_manager, FasSceneMainMenu);
+            consumed = true;
+            break;
+
+        default:
+            break;
+        }
+    }
+    return consumed;
+}
+
+void fas_scene_reboot_confirm_on_exit(void* context) {
+    FasApp* app = context;
+    dialog_ex_reset(app->dialog_ex);
+}
