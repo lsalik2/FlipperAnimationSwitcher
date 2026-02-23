@@ -91,3 +91,12 @@ bool fas_scene_anim_list_on_event(void* context, SceneManagerEvent event) {
     }
     return consumed;
 }
+
+void fas_scene_anim_list_on_exit(void* context) {
+    FasApp* app = context;
+    /* Sync checkbox state and cursor from the view back to app data */
+    for(int i = 0; i < app->animation_count; i++) {
+        app->animations[i].selected = fas_list_view_get_checked(app->list_view, i);
+    }
+    app->current_anim_index = fas_list_view_get_cursor(app->list_view);
+}
