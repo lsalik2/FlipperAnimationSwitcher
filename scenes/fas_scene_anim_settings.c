@@ -48,3 +48,10 @@ static void cb_max_level(VariableItem* item) {
     app->animations[app->current_anim_index].max_level = val;
     set_text(item, val);
 }
+
+static void cb_weight(VariableItem* item) {
+    FasApp* app = variable_item_get_context(item);
+    int     val = (int)variable_item_get_current_value_index(item) + WEIGHT_MIN;
+    app->animations[app->current_anim_index].weight = val;
+    set_text(item, val);
+}
