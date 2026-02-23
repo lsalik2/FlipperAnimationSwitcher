@@ -239,3 +239,14 @@ bool fas_save_playlist(FasApp* app, const char* name) {
     storage_file_free(f);
     return true;
 }
+
+/**
+ * Remove a playlist file from the apps_data folder.
+ */
+bool fas_delete_playlist(FasApp* app, int index) {
+    if(index < 0 || index >= app->playlist_count) return false;
+    char path[FAS_PATH_LEN];
+    snprintf(path, sizeof(path), "%s/%s.txt",
+            FAS_PLAYLISTS_PATH, app->playlists[index].name);
+    return storage_simply_remove(app->storage, path);
+}
