@@ -35,3 +35,36 @@ void fas_scene_choose_playlist_on_enter(void* context) {
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FasViewList);
 }
+
+bool fas_scene_choose_playlist_on_event(void* context, SceneManagerEvent event) {
+    FasApp* app      = context;
+    bool    consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        switch(event.event) {
+
+        case FasEvtChooseSelect:
+            if(app->playlist_count > 0) {
+                fas_apply_playlist(app, app->current_playlist_index);
+                scene_manager_next_scene(app->scene_manager, FasSceneRebootConfirm);
+            }
+            consumed = true;
+            break;
+
+        case FasEvtChoosePreview:
+            if(app->playlist_count > 0) {
+                scene_manager_next_scene(app->scene_manager, FasScenePlaylistPreview);
+            }
+            consumed = true;
+            break;
+
+        default:
+            break;
+        }
+    }
+    return consumed;
+}
+
+void fas_scene_choose_playlist_on_exit(void* context) {
+    UNUSED(context);
+}
