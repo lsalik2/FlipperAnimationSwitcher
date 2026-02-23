@@ -8,6 +8,6 @@ Initial release:
 - Apply playlists to manifest.txt with reboot prompt
 - Delete saved playlists
 - Preview playlist contents via long-press
-- Per-animation settings for butthurt, level, and weight
+- Per-animation settings for butthurt, level, and weight in playlist creation
 - Custom scrollable list view with checkbox support
 - About section linking to the source code
