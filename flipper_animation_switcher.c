@@ -195,3 +195,47 @@ bool fas_load_playlists(FasApp* app) {
     storage_file_free(dir);
     return true;
 }
+
+/**
+ * Write a playlist file containing all currently-selected animations.
+ * Format mirrors manifest.txt exactly so it can be directly copied over it.
+ */
+bool fas_save_playlist(FasApp* app, const char* name) {
+    char path[FAS_PATH_LEN];
+    snprintf(path, sizeof(path), "%s/%s.txt", FAS_PLAYLISTS_PATH, name);
+
+    File* f = storage_file_alloc(app->storage);
+    if(!storage_file_open(f, path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        storage_file_free(f);
+        return false;
+    }
+
+    /* Manifest header */
+    const char* header = "Filetype: Flipper Animation Manifest\nVersion: 1\n";
+    storage_file_write(f, header, strlen(header));
+
+    /* One block per selected animation */
+    for(int i = 0; i < app->animation_count; i++) {
+        if(!app->animations[i].selected) continue;
+        char buf[256];
+        int  len = snprintf(
+            buf, sizeof(buf),
+            "\nName: %s\n"
+            "Min butthurt: %d\n"
+            "Max butthurt: %d\n"
+            "Min level: %d\n"
+            "Max level: %d\n"
+            "Weight: %d\n",
+            app->animations[i].name,
+            app->animations[i].min_butthurt,
+            app->animations[i].max_butthurt,
+            app->animations[i].min_level,
+            app->animations[i].max_level,
+            app->animations[i].weight);
+        if(len > 0) storage_file_write(f, buf, (uint16_t)len);
+    }
+
+    storage_file_close(f);
+    storage_file_free(f);
+    return true;
+}
