@@ -17,3 +17,21 @@ static void fas_choose_playlist_cb(void* context, int index, FasListEvent event)
         break;
     }
 }
+
+void fas_scene_choose_playlist_on_enter(void* context) {
+    FasApp* app = context;
+    fas_load_playlists(app);
+
+    fas_list_view_reset(app->list_view);
+    fas_list_view_set_callback(app->list_view, fas_choose_playlist_cb, app);
+
+    if(app->playlist_count == 0) {
+        fas_list_view_add_item(app->list_view, "No playlists yet", false, false);
+    } else {
+        for(int i = 0; i < app->playlist_count; i++) {
+            fas_list_view_add_item(app->list_view, app->playlists[i].name, false, false);
+        }
+    }
+
+    view_dispatcher_switch_to_view(app->view_dispatcher, FasViewList);
+}
