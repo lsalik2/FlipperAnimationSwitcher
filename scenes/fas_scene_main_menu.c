@@ -1,5 +1,6 @@
 #include "../flipper_animation_switcher.h"
 #include "fas_scene.h"
+#include "flipper_animation_switcher_icons.h"
 
 typedef enum {
     FasMainIdxCreate = 0,
@@ -16,10 +17,10 @@ static void fas_main_menu_cb(void* context, uint32_t index) {
 void fas_scene_main_menu_on_enter(void* context) {
     FasApp* app = context;
     menu_reset(app->menu);
-    menu_add_item(app->menu, "Create Playlist", NULL, FasMainIdxCreate,  fas_main_menu_cb, app);
-    menu_add_item(app->menu, "Choose Playlist", NULL, FasMainIdxChoose,  fas_main_menu_cb, app);
-    menu_add_item(app->menu, "Delete Playlist", NULL, FasMainIdxDelete,  fas_main_menu_cb, app);
-    menu_add_item(app->menu, "About / Help",    NULL, FasMainIdxAbout,   fas_main_menu_cb, app);
+    menu_add_item(app->menu, "Create Playlist", &I_create, FasMainIdxCreate, fas_main_menu_cb, app);
+    menu_add_item(app->menu, "Choose Playlist", &I_choose, FasMainIdxChoose, fas_main_menu_cb, app);
+    menu_add_item(app->menu, "Delete Playlist", &I_delete, FasMainIdxDelete, fas_main_menu_cb, app);
+    menu_add_item(app->menu, "About / Help",    &I_about,  FasMainIdxAbout,  fas_main_menu_cb, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, FasViewMenu);
 }
 
