@@ -22,3 +22,32 @@ void fas_scene_playlist_name_on_enter(void* context) {
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FasViewTextInput);
 }
+
+bool fas_scene_playlist_name_on_event(void* context, SceneManagerEvent event) {
+    FasApp* app      = context;
+    bool    consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom &&
+        event.event == FasEvtPlaylistNameDone) {
+
+        if(strlen(app->text_input_buffer) > 0) {
+            fas_save_playlist(app, app->text_input_buffer);
+            /*
+             * Reset so the next "Create Playlist" starts completely fresh:
+             * clearing animation_count forces fas_load_animations() on re-entry.
+             */
+            app->animation_count      = 0;
+            app->returning_from_settings = false;
+        }
+
+        /* Return to the main menu */
+        scene_manager_search_and_switch_to_previous_scene(
+            app->scene_manager, FasSceneMainMenu);
+        consumed = true;
+    }
+    return consumed;
+}
+
+void fas_scene_playlist_name_on_exit(void* context) {
+    UNUSED(context);
+}
