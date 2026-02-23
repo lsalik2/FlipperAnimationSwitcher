@@ -153,3 +153,45 @@ bool fas_load_animations(FasApp* app) {
     storage_file_free(dir);
     return (app->animation_count > 0);
 }
+
+/**
+ * Scan the playlists folder for .txt files.
+ * Strips the .txt suffix and stores the bare name.
+ */
+bool fas_load_playlists(FasApp* app) {
+    app->playlist_count = 0;
+    fas_ensure_playlists_dir(app);
+
+    File* dir = storage_file_alloc(app->storage);
+    if(!storage_dir_open(dir, FAS_PLAYLISTS_PATH)) {
+        storage_file_free(dir);
+        return false;
+    }
+
+    FileInfo fi;
+    /*
+     * Buffer is large enough for the name + ".txt\0".
+     * FAS_PLAYLIST_NAME_LEN already includes space for the null terminator,
+     * so we add 4 for the extension.
+     */
+    char name[FAS_PLAYLIST_NAME_LEN + 4];
+
+    while(storage_dir_read(dir, &fi, name, sizeof(name)) &&
+        app->playlist_count < FAS_MAX_PLAYLISTS) {
+        if(fi.flags & FSF_DIRECTORY) continue;
+
+        int len = (int)strlen(name);
+        if(len > 4 && strcmp(name + len - 4, ".txt") == 0) {
+            PlaylistEntry* e = &app->playlists[app->playlist_count];
+            int  bare_len    = len - 4;
+            if(bare_len >= FAS_PLAYLIST_NAME_LEN) bare_len = FAS_PLAYLIST_NAME_LEN - 1;
+            memcpy(e->name, name, bare_len);
+            e->name[bare_len] = '\0';
+            app->playlist_count++;
+        }
+    }
+
+    storage_dir_close(dir);
+    storage_file_free(dir);
+    return true;
+}
