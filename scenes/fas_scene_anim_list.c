@@ -56,3 +56,6 @@ void fas_scene_anim_list_on_enter(void* context) {
         /* Restore cursor so it's still on the last-edited animation */
         fas_list_view_set_cursor(app->list_view, app->current_anim_index);
     }
+
+    view_dispatcher_switch_to_view(app->view_dispatcher, FasViewList);
+}
