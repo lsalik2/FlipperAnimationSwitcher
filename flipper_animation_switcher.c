@@ -110,3 +110,46 @@ static void fas_app_free(FasApp* app) {
 void fas_ensure_playlists_dir(FasApp* app) {
     storage_simply_mkdir(app->storage, FAS_PLAYLISTS_PATH);
 }
+
+/**
+ * Scan /ext/dolphin for subdirectories — each subdirectory is an animation.
+ * Resets animation_count and populates the animations[] array with defaults.
+ */
+bool fas_load_animations(FasApp* app) {
+    app->animation_count = 0;
+
+    /* Verify SD card / dolphin folder is accessible */
+    if(storage_common_stat(app->storage, FAS_DOLPHIN_PATH, NULL) != FSE_OK) {
+        return false;
+    }
+
+    File* dir = storage_file_alloc(app->storage);
+    if(!storage_dir_open(dir, FAS_DOLPHIN_PATH)) {
+        storage_file_free(dir);
+        return false;
+    }
+
+    FileInfo fi;
+    char     name[FAS_ANIM_NAME_LEN];
+
+    while(storage_dir_read(dir, &fi, name, sizeof(name)) &&
+        app->animation_count < FAS_MAX_ANIMATIONS) {
+        /* Only include subdirectories (not manifest.txt or other files) */
+        if(fi.flags & FSF_DIRECTORY) {
+            AnimEntry* e = &app->animations[app->animation_count];
+            strncpy(e->name, name, FAS_ANIM_NAME_LEN - 1);
+            e->name[FAS_ANIM_NAME_LEN - 1] = '\0';
+            e->selected      = false;
+            e->min_butthurt  = FAS_DEFAULT_MIN_BUTTHURT;
+            e->max_butthurt  = FAS_DEFAULT_MAX_BUTTHURT;
+            e->min_level     = FAS_DEFAULT_MIN_LEVEL;
+            e->max_level     = FAS_DEFAULT_MAX_LEVEL;
+            e->weight        = FAS_DEFAULT_WEIGHT;
+            app->animation_count++;
+        }
+    }
+
+    storage_dir_close(dir);
+    storage_file_free(dir);
+    return (app->animation_count > 0);
+}
