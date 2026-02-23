@@ -34,3 +34,17 @@ static void cb_max_butthurt(VariableItem* item) {
     app->animations[app->current_anim_index].max_butthurt = val;
     set_text(item, val);
 }
+
+static void cb_min_level(VariableItem* item) {
+    FasApp* app = variable_item_get_context(item);
+    int     val = (int)variable_item_get_current_value_index(item) + MIN_LEVEL_MIN;
+    app->animations[app->current_anim_index].min_level = val;
+    set_text(item, val);
+}
+
+static void cb_max_level(VariableItem* item) {
+    FasApp* app = variable_item_get_context(item);
+    int     val = (int)variable_item_get_current_value_index(item) + MAX_LEVEL_MIN;
+    app->animations[app->current_anim_index].max_level = val;
+    set_text(item, val);
+}
