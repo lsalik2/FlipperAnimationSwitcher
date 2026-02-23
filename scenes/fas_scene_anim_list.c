@@ -59,3 +59,35 @@ void fas_scene_anim_list_on_enter(void* context) {
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FasViewList);
 }
+
+bool fas_scene_anim_list_on_event(void* context, SceneManagerEvent event) {
+    FasApp* app      = context;
+    bool    consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        switch(event.event) {
+
+        case FasEvtAnimListOpenSettings:
+            scene_manager_next_scene(app->scene_manager, FasSceneAnimSettings);
+            consumed = true;
+            break;
+
+        case FasEvtAnimListDone: {
+            /* Only proceed if at least one animation is selected */
+            bool any = false;
+            for(int i = 0; i < app->animation_count; i++) {
+                if(app->animations[i].selected) { any = true; break; }
+            }
+            if(any) {
+                scene_manager_next_scene(app->scene_manager, FasScenePlaylistName);
+            }
+            consumed = true;
+            break;
+        }
+
+        default:
+            break;
+        }
+    }
+    return consumed;
+}
