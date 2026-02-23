@@ -28,3 +28,31 @@ static void fas_anim_list_cb(void* context, int index, FasListEvent event) {
         break;
     }
 }
+
+/* ── Scene handlers ───────────────────────────────────────────────────── */
+void fas_scene_anim_list_on_enter(void* context) {
+    FasApp* app = context;
+
+    /* Fresh entry (first time or after completing/aborting a playlist) */
+    if(!app->returning_from_settings) {
+        fas_load_animations(app);
+        app->current_anim_index = 0;
+    }
+    app->returning_from_settings = false;
+
+    fas_list_view_reset(app->list_view);
+    fas_list_view_set_callback(app->list_view, fas_anim_list_cb, app);
+
+    if(app->animation_count == 0) {
+        fas_list_view_add_item(app->list_view, "No animations found", false, false);
+    } else {
+        for(int i = 0; i < app->animation_count; i++) {
+            fas_list_view_add_item(
+                app->list_view,
+                app->animations[i].name,
+                /*has_checkbox=*/true,
+                app->animations[i].selected);
+        }
+        /* Restore cursor so it's still on the last-edited animation */
+        fas_list_view_set_cursor(app->list_view, app->current_anim_index);
+    }
