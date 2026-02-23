@@ -1,34 +1,61 @@
 # Flipper Animation Switcher
 
-A Flipper Zero application that lets you create, manage, and switch between
-**animation playlists** — template `manifest.txt` files that control which
-background animations play on your Flipper. Currently supports up to 128 animations.
+A Flipper Zero application for creating, managing, and switching **animation playlists** - template `manifest.txt` files that control which background animations play on your Flipper. Supports up to 128 animations per playlist.
 
-## Features
+---
 
-| Feature | Description |
+## Menus
+
+| Menu | Description |
 |---|---|
-| **Create Playlist** | Select any subset of animations on your Flipper, optionally fine-tune per-animation settings, then save as a named playlist. |
-| **Choose Playlist** | Apply a playlist (overwrites `manifest.txt`). A reboot prompt appears to activate the changes. |
-| **Delete Playlist** | Remove any saved playlists. |
-| **Preview** | Long-press any playlist to see which animations it contains. |
-| **About / Help** | Version info and repo link. |
+| **Create Playlist** | Select animations, optionally fine-tune per-animation settings, then save as a named playlist. |
+| **Choose Playlist** | Apply a saved playlist (overwrites `manifest.txt`). |
+| **Delete Playlist** | Remove any saved playlist. |
+| **About / Help** | App info and help section. |
+
+---
 
 ## Controls
 
-| Screen | Button | Action |
-|---|---|---|
-| Create Playlist | ↑ / ↓ | Navigate items |
-| Create Playlist | OK (short) | Toggle checkbox |
-| Create Playlist | OK (long) | Edit min/max butthurt, level & weight |
-| Create Playlist | → | Proceed to name-entry |
-| Create Playlist (after long press) | ← / → | Adjust value |
-| Choose Playlist | OK (short) | Select / confirm |
-| Choose Playlist | OK (long) | Preview animations in that playlist |
+### Main Menu
+
+| Button | Action |
+|---|---|
+| ↑ / ↓ | Navigate options |
+| OK | Select option |
+| ← (Back) | Exit app |
+
+### Create Playlist — Animation List
+
+| Button | Action |
+|---|---|
+| ↑ / ↓ | Navigate animations |
+| OK (short) | Toggle checkbox |
+| OK (long) | Edit per-animation settings |
+| → | Proceed to name entry (requires ≥ 1 selected) |
+
+### Create Playlist — Animation Settings
+
+| Button | Action |
+|---|---|
+| ↑ / ↓ | Navigate settings |
+| ← / → | Adjust value |
+| ← (Back) | Return to animation list |
+
+### Choose / Delete Playlist
+
+| Button | Action |
+|---|---|
+| ↑ / ↓ | Navigate playlists |
+| OK (short) | Apply playlist / Confirm delete |
+| OK (long) | Preview playlist animations |
+| ← (Back) | Return to main menu |
+
+---
 
 ## Default Animation Values
 
-When an animation is added without editing its per-animation settings, these defaults are applied:
+When an animation is added without customising its settings, these defaults are used:
 
 | Setting | Default |
 |---|---|
@@ -38,33 +65,41 @@ When an animation is added without editing its per-animation settings, these def
 | Max Level | 30 |
 | Weight | 3 |
 
+---
+
 ## File Locations
 
 | Path | Contents |
 |---|---|
 | `/ext/dolphin/` | Animation folders (read-only by this app) |
 | `/ext/dolphin/manifest.txt` | Active animation manifest (overwritten on Apply) |
-| `/ext/apps_data/flipper_animation_switcher/` | Saved playlist `.txt` files |
+| `/ext/apps_data/animation_switcher/` | Saved playlist `.txt` files |
+
+---
 
 ## Building
 
-This app targets the **official Flipper Zero firmware**. Most custom firmware should be supported however.
+This app targets the **official Flipper Zero firmware**. Most custom firmware builds should also be supported.
 
-Install `ufbt`, instructions available from its official [GitHub page](https://github.com/flipperdevices/flipperzero-ufbt)
+Install `ufbt` - instructions on its official [GitHub page](https://github.com/flipperdevices/flipperzero-ufbt).
 
-In the terminal, run this command in the root folder of this repo:
+Then run this command from the root of the repo:
 
 ```bash
-# Builds and uploads the app into the Flipper
+# Builds and uploads the app to the Flipper
 ufbt launch
 ```
 
+---
+
 ## Roadmap
 
-- Backup of the last 5 manifest.txt file before changing them
+- Manual `manifest.txt` import as a playlist
+- Automatic backup of the previous `manifest.txt` before applying a new playlist
 - Animation previewer screen
-- Increase total animation size
-- Add help screen with controls in About section
+- Increase maximum animation count beyond 128
+
+---
 
 ## License
 
