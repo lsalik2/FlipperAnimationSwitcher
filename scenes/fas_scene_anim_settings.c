@@ -12,3 +12,10 @@
 #define MAX_LEVEL_MAX    30
 #define WEIGHT_MIN       1
 #define WEIGHT_MAX       99
+
+/* ── Helper: write the numeric label for an item ─────────────────────── */
+static void set_text(VariableItem* item, int val) {
+    char buf[8];
+    snprintf(buf, sizeof(buf), "%d", val);
+    variable_item_set_current_value_text(item, buf);
+}
