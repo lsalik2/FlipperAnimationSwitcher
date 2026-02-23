@@ -112,3 +112,9 @@ void fas_scene_anim_settings_on_enter(void* context) {
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FasViewVarList);
 }
+
+bool fas_scene_anim_settings_on_event(void* context, SceneManagerEvent event) {
+    UNUSED(context);
+    UNUSED(event);
+    return false; /* Back button handled by scene manager automatically */
+}
