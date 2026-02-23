@@ -3,7 +3,8 @@
 
 #define FAS_VERSION   "1.0.0"
 #define FAS_AUTHOR    "SLK"
-#define FAS_REPO      "github.com/lsalik2/FlipperAnimationSwitcher"
+#define FAS_GH_AUTHOR      "github.com/lsalik2/"
+#define FAS_REPO      "FlipperAnimationSwitcher"
 
 void fas_scene_about_on_enter(void* context) {
     FasApp* app = context;
@@ -18,11 +19,11 @@ void fas_scene_about_on_enter(void* context) {
 
     widget_add_string_element(
         app->widget, 64, 26, AlignCenter, AlignTop, FontSecondary,
-        "Create playlists to swap");
+        "Source code:");
 
     widget_add_string_element(
         app->widget, 64, 36, AlignCenter, AlignTop, FontSecondary,
-        "dolphin animation sets.");
+        FAS_GH_AUTHOR);
 
     widget_add_string_element(
         app->widget, 64, 46, AlignCenter, AlignTop, FontSecondary,
