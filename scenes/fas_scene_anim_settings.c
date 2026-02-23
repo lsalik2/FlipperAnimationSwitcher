@@ -118,3 +118,8 @@ bool fas_scene_anim_settings_on_event(void* context, SceneManagerEvent event) {
     UNUSED(event);
     return false; /* Back button handled by scene manager automatically */
 }
+
+void fas_scene_anim_settings_on_exit(void* context) {
+    FasApp* app = context;
+    variable_item_list_reset(app->var_list);
+}
