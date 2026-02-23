@@ -66,3 +66,14 @@ void fas_scene_playlist_preview_on_enter(void* context) {
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FasViewWidget);
 }
+
+bool fas_scene_playlist_preview_on_event(void* context, SceneManagerEvent event) {
+    UNUSED(context);
+    UNUSED(event);
+    return false;
+}
+
+void fas_scene_playlist_preview_on_exit(void* context) {
+    FasApp* app = context;
+    widget_reset(app->widget);
+}
