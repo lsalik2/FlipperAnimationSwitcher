@@ -19,3 +19,11 @@ static void set_text(VariableItem* item, int val) {
     snprintf(buf, sizeof(buf), "%d", val);
     variable_item_set_current_value_text(item, buf);
 }
+
+/* ── Change callbacks ────────────────────────────────────────────────── */
+static void cb_min_butthurt(VariableItem* item) {
+    FasApp* app = variable_item_get_context(item);
+    int     val = (int)variable_item_get_current_value_index(item) + MIN_BUTTHURT_MIN;
+    app->animations[app->current_anim_index].min_butthurt = val;
+    set_text(item, val);
+}
