@@ -45,3 +45,24 @@ static void build_preview_text(FasApp* app, char* out, int out_size) {
     storage_file_close(f);
     storage_file_free(f);
 }
+
+/* ── Scene handlers ───────────────────────────────────────────────────── */
+void fas_scene_playlist_preview_on_enter(void* context) {
+    FasApp* app = context;
+    widget_reset(app->widget);
+
+    /* Title */
+    char title[FAS_PLAYLIST_NAME_LEN + 16];
+    snprintf(title, sizeof(title), "Playlist: %s",
+             app->playlists[app->current_playlist_index].name);
+    widget_add_string_element(
+        app->widget, 64, 2, AlignCenter, AlignTop, FontPrimary, title);
+
+    /* Animation list as scrollable text */
+    static char preview_buf[512];
+    preview_buf[0] = '\0';
+    build_preview_text(app, preview_buf, sizeof(preview_buf));
+    widget_add_text_scroll_element(app->widget, 0, 14, 128, 50, preview_buf);
+
+    view_dispatcher_switch_to_view(app->view_dispatcher, FasViewWidget);
+}
