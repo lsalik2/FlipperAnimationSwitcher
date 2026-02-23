@@ -250,3 +250,23 @@ bool fas_delete_playlist(FasApp* app, int index) {
             FAS_PLAYLISTS_PATH, app->playlists[index].name);
     return storage_simply_remove(app->storage, path);
 }
+
+/**
+ * Copy a saved playlist file over /ext/dolphin/manifest.txt.
+ * The Flipper's animation manager reads this file on next boot.
+ */
+bool fas_apply_playlist(FasApp* app, int index) {
+    if(index < 0 || index >= app->playlist_count) return false;
+
+    char src[FAS_PATH_LEN];
+    snprintf(src, sizeof(src), "%s/%s.txt",
+            FAS_PLAYLISTS_PATH, app->playlists[index].name);
+
+    /* storage_common_copy will not overwrite an existing destination file,
+     * so we must remove the current manifest first.  We ignore the return
+     * value here because the file may legitimately not exist yet. */
+    storage_simply_remove(app->storage, FAS_MANIFEST_PATH);
+
+    FS_Error err = storage_common_copy(app->storage, src, FAS_MANIFEST_PATH);
+    return (err == FSE_OK);
+}
