@@ -10,3 +10,4 @@ Initial release:
 - Preview playlist contents via long-press
 - Per-animation settings for butthurt, level, and weight
 - Custom scrollable list view with checkbox support
+- About section linking to the source code
