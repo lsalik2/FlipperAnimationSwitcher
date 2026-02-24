@@ -21,35 +21,35 @@ A Flipper Zero application for creating, managing, and switching **animation pla
 
 | Button | Action |
 |---|---|
-| ↑ / ↓ | Navigate options |
+| Up / Down | Navigate options |
 | OK | Select option |
-| ← (Back) | Exit app |
+| Back | Exit app |
 
-### Create Playlist — Animation List
+### Create Playlist - Animation List
 
 | Button | Action |
 |---|---|
-| ↑ / ↓ | Navigate animations |
+| Up / Down | Navigate animations |
 | OK (short) | Toggle checkbox |
 | OK (long) | Edit per-animation settings |
-| → | Proceed to name entry (requires ≥ 1 selected) |
+| Right | Proceed to name entry (requires 1+ selected) |
 
-### Create Playlist — Animation Settings
+### Create Playlist - Animation Settings
 
 | Button | Action |
 |---|---|
-| ↑ / ↓ | Navigate settings |
-| ← / → | Adjust value |
-| ← (Back) | Return to animation list |
+| Up / Down | Navigate settings |
+| Left / Right | Adjust value |
+| Back | Return to animation list |
 
 ### Choose / Delete Playlist
 
 | Button | Action |
 |---|---|
-| ↑ / ↓ | Navigate playlists |
+| Up / Down | Navigate playlists |
 | OK (short) | Apply playlist / Confirm delete |
 | OK (long) | Preview playlist animations |
-| ← (Back) | Return to main menu |
+| Back | Return to main menu |
 
 ---
 
@@ -98,9 +98,3 @@ ufbt launch
 - Automatic backup of the previous `manifest.txt` before applying a new playlist
 - Animation previewer screen
 - Increase maximum animation count beyond 128
-
----
-
-## License
-
-MIT © 2026 SLK
