@@ -11,5 +11,5 @@ App(
     fap_author="@lsalik2",
     fap_weburl="https://github.com/lsalik2/FlipperAnimationSwitcher",
     fap_version="1.0",
-    fap_description="Dynamic manifest.txt updating utility.",
+    fap_description="Change your background animations on the fly!",
 )
