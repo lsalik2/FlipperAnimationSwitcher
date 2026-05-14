@@ -270,6 +270,63 @@ bool fas_playlist_exists(FasApp* app, const char* name) {
     return storage_common_stat(app->storage, path, NULL) == FSE_OK;
 }
 
+/* Byte-by-byte equality check for two files.  Used by the active-playlist
+ * lookup to confirm a content match after a cheap size check. */
+static bool fas_files_equal(FasApp* app, const char* a, const char* b) {
+    File* fa = storage_file_alloc(app->storage);
+    File* fb = storage_file_alloc(app->storage);
+    bool  result = false;
+
+    if(storage_file_open(fa, a, FSAM_READ, FSOM_OPEN_EXISTING) &&
+       storage_file_open(fb, b, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        result = true;
+        uint8_t buf_a[256], buf_b[256];
+        while(true) {
+            uint16_t n_a = storage_file_read(fa, buf_a, sizeof(buf_a));
+            uint16_t n_b = storage_file_read(fb, buf_b, sizeof(buf_b));
+            if(n_a != n_b || memcmp(buf_a, buf_b, n_a) != 0) {
+                result = false;
+                break;
+            }
+            if(n_a == 0) break;
+        }
+    }
+
+    storage_file_close(fa);
+    storage_file_close(fb);
+    storage_file_free(fa);
+    storage_file_free(fb);
+    return result;
+}
+
+/**
+ * Find which saved playlist (if any) matches the currently-applied
+ * manifest.txt.  Filters by file size first so most non-matches are
+ * rejected cheaply.  Returns -1 when nothing matches or the manifest
+ * is missing.
+ */
+int fas_active_playlist_index(FasApp* app) {
+    FileInfo manifest_info;
+    if(storage_common_stat(app->storage, FAS_MANIFEST_PATH, &manifest_info) != FSE_OK) {
+        return -1;
+    }
+
+    for(int i = 0; i < app->playlist_count; i++) {
+        char path[FAS_PATH_LEN];
+        snprintf(path, sizeof(path), "%s/%s.txt",
+                 FAS_PLAYLISTS_PATH, app->playlists[i].name);
+
+        FileInfo info;
+        if(storage_common_stat(app->storage, path, &info) != FSE_OK) continue;
+        if(info.size != manifest_info.size) continue;
+
+        if(fas_files_equal(app, FAS_MANIFEST_PATH, path)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 /**
  * Remove a playlist file from the apps_data folder.
  */

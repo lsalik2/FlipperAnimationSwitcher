@@ -121,3 +121,4 @@ bool fas_delete_playlist(FasApp* app, int index);
 bool fas_apply_playlist(FasApp* app, int index);
 bool fas_manifest_exists(FasApp* app);
 bool fas_playlist_exists(FasApp* app, const char* name);
+int  fas_active_playlist_index(FasApp* app);
