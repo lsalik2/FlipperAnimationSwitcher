@@ -264,6 +264,22 @@ bool fas_manifest_exists(FasApp* app) {
     return storage_common_stat(app->storage, FAS_MANIFEST_PATH, NULL) == FSE_OK;
 }
 
+bool fas_manifest_backup_exists(FasApp* app) {
+    return storage_common_stat(app->storage, FAS_MANIFEST_BACKUP_PATH, NULL) == FSE_OK;
+}
+
+/**
+ * Copy /ext/dolphin/manifest.txt.bak over /ext/dolphin/manifest.txt.
+ * The backup file itself is left in place so the user can retry if the
+ * Flipper fails to reboot or they change their mind again.
+ */
+bool fas_restore_manifest(FasApp* app) {
+    if(!fas_manifest_backup_exists(app)) return false;
+    storage_simply_remove(app->storage, FAS_MANIFEST_PATH);
+    return storage_common_copy(
+        app->storage, FAS_MANIFEST_BACKUP_PATH, FAS_MANIFEST_PATH) == FSE_OK;
+}
+
 bool fas_playlist_exists(FasApp* app, const char* name) {
     char path[FAS_PATH_LEN];
     snprintf(path, sizeof(path), "%s/%s.txt", FAS_PLAYLISTS_PATH, name);
