@@ -13,9 +13,14 @@ static void fas_reboot_confirm_cb(DialogExResult result, void* context) {
 void fas_scene_reboot_confirm_on_enter(void* context) {
     FasApp* app = context;
 
+    uint32_t source = scene_manager_get_scene_state(
+        app->scene_manager, FasSceneRebootConfirm);
+    const char* header = (source == FasRebootSourceRestore)
+        ? "Backup Restored!"
+        : "Playlist Applied!";
+
     dialog_ex_reset(app->dialog_ex);
-    dialog_ex_set_header(
-        app->dialog_ex, "Playlist Applied!", 64, 8, AlignCenter, AlignCenter);
+    dialog_ex_set_header(app->dialog_ex, header, 64, 8, AlignCenter, AlignCenter);
     dialog_ex_set_text(
         app->dialog_ex,
         "Reboot now to load\nthe new animations?",
