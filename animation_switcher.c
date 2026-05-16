@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /* ═══════════════════════════════════════════════════════════════════════
  * ViewDispatcher callbacks
@@ -140,11 +141,11 @@ bool fas_load_animations(FasApp* app) {
             strncpy(e->name, name, FAS_ANIM_NAME_LEN - 1);
             e->name[FAS_ANIM_NAME_LEN - 1] = '\0';
             e->selected      = false;
-            e->min_butthurt  = FAS_DEFAULT_MIN_BUTTHURT;
-            e->max_butthurt  = FAS_DEFAULT_MAX_BUTTHURT;
-            e->min_level     = FAS_DEFAULT_MIN_LEVEL;
-            e->max_level     = FAS_DEFAULT_MAX_LEVEL;
-            e->weight        = FAS_DEFAULT_WEIGHT;
+            e->min_butthurt  = app->defaults.min_butthurt;
+            e->max_butthurt  = app->defaults.max_butthurt;
+            e->min_level     = app->defaults.min_level;
+            e->max_level     = app->defaults.max_level;
+            e->weight        = app->defaults.weight;
             app->animation_count++;
         }
     }
@@ -385,6 +386,91 @@ bool fas_apply_playlist(FasApp* app, int index) {
     return (err == FSE_OK);
 }
 
+/* Clamp helper used after parsing the (untrusted) config file. */
+static int fas_clamp_int(int v, int lo, int hi) {
+    if(v < lo) return lo;
+    if(v > hi) return hi;
+    return v;
+}
+
+/**
+ * Populate app->defaults from FAS_CONFIG_PATH.  Missing or unparseable
+ * keys fall back to the FAS_DEFAULT_* compile-time values, and out-of-
+ * range values are clamped to the ranges enforced by the settings UI.
+ */
+void fas_load_config(FasApp* app) {
+    app->defaults.min_butthurt = FAS_DEFAULT_MIN_BUTTHURT;
+    app->defaults.max_butthurt = FAS_DEFAULT_MAX_BUTTHURT;
+    app->defaults.min_level    = FAS_DEFAULT_MIN_LEVEL;
+    app->defaults.max_level    = FAS_DEFAULT_MAX_LEVEL;
+    app->defaults.weight       = FAS_DEFAULT_WEIGHT;
+
+    File* f = storage_file_alloc(app->storage);
+    if(!storage_file_open(f, FAS_CONFIG_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        storage_file_free(f);
+        return;
+    }
+
+    char     buf[256];
+    uint16_t n = storage_file_read(f, buf, sizeof(buf) - 1);
+    storage_file_close(f);
+    storage_file_free(f);
+    if(n == 0) return;
+    buf[n] = '\0';
+
+    char* line = buf;
+    while(line && *line) {
+        char* nl = strchr(line, '\n');
+        if(nl) *nl = '\0';
+        char* eq = strchr(line, '=');
+        if(eq) {
+            *eq = '\0';
+            int val = atoi(eq + 1);
+            if(strcmp(line, "min_butthurt") == 0)      app->defaults.min_butthurt = val;
+            else if(strcmp(line, "max_butthurt") == 0) app->defaults.max_butthurt = val;
+            else if(strcmp(line, "min_level") == 0)    app->defaults.min_level    = val;
+            else if(strcmp(line, "max_level") == 0)    app->defaults.max_level    = val;
+            else if(strcmp(line, "weight") == 0)       app->defaults.weight       = val;
+        }
+        line = nl ? nl + 1 : NULL;
+    }
+
+    app->defaults.min_butthurt = fas_clamp_int(app->defaults.min_butthurt, 0,  14);
+    app->defaults.max_butthurt = fas_clamp_int(app->defaults.max_butthurt, 0,  14);
+    app->defaults.min_level    = fas_clamp_int(app->defaults.min_level,    1,  30);
+    app->defaults.max_level    = fas_clamp_int(app->defaults.max_level,    1,  30);
+    app->defaults.weight       = fas_clamp_int(app->defaults.weight,       1,  99);
+}
+
+bool fas_save_config(FasApp* app) {
+    fas_ensure_playlists_dir(app);
+
+    File* f = storage_file_alloc(app->storage);
+    if(!storage_file_open(f, FAS_CONFIG_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        storage_file_free(f);
+        return false;
+    }
+
+    char buf[128];
+    int  len = snprintf(
+        buf, sizeof(buf),
+        "min_butthurt=%d\n"
+        "max_butthurt=%d\n"
+        "min_level=%d\n"
+        "max_level=%d\n"
+        "weight=%d\n",
+        app->defaults.min_butthurt,
+        app->defaults.max_butthurt,
+        app->defaults.min_level,
+        app->defaults.max_level,
+        app->defaults.weight);
+
+    if(len > 0) storage_file_write(f, buf, (uint16_t)len);
+    storage_file_close(f);
+    storage_file_free(f);
+    return true;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
  * Entry point
  * ═══════════════════════════════════════════════════════════════════════ */
@@ -394,6 +480,7 @@ int32_t fas_app_entry(void* p) {
 
     FasApp* app = fas_app_alloc();
     fas_ensure_playlists_dir(app);
+    fas_load_config(app);
 
     /* Start at the main menu */
     scene_manager_next_scene(app->scene_manager, FasSceneMainMenu);
