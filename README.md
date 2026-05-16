@@ -59,5 +59,13 @@ Install and run ufbt - instructions on its official [GitHub page](https://github
 
 ## Roadmap
 
+- Restore the previous manifest from `manifest.txt.bak` via a menu entry
+- Edit an existing playlist instead of having to recreate it
+- Mark the currently-applied playlist in the Choose list
+- Bulk select / deselect / invert in the animation list
+- Shuffle: generate a random playlist of N animations
 - Animation previewer screen
+- Search / filter animations by name in the Create flow
+- Configurable default values for new animation selections
+- Show playlist stats (count, butthurt/level coverage) in the preview
 - Increase maximum animation count beyond 128
