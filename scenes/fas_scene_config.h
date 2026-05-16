@@ -1,6 +1,7 @@
 ADD_SCENE(fas, main_menu,         MainMenu)
 ADD_SCENE(fas, anim_list,         AnimList)
 ADD_SCENE(fas, anim_settings,     AnimSettings)
+ADD_SCENE(fas, anim_filter,       AnimFilter)
 ADD_SCENE(fas, playlist_name,     PlaylistName)
 ADD_SCENE(fas, overwrite_confirm, OverwriteConfirm)
 ADD_SCENE(fas, choose_playlist,   ChoosePlaylist)

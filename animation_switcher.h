@@ -76,6 +76,8 @@ typedef enum {
     FasEvtOverwriteNo,
     FasEvtRestoreYes,
     FasEvtRestoreNo,
+    FasEvtAnimListOpenFilter,
+    FasEvtAnimFilterDone,
 } FasCustomEvent;
 
 /* ── Reboot-confirm scene state (which operation just finished) ───────── */
@@ -103,6 +105,14 @@ typedef struct {
     AnimEntry animations[FAS_MAX_ANIMATIONS];
     int        animation_count;
     int        current_anim_index;   /* index of animation being edited */
+
+    /* Animation list filter: case-insensitive substring match on name.
+     * Empty string disables the filter.  visible_animations[] maps a
+     * row in the filtered list-view back to the underlying index in
+     * animations[].  visible_count == animation_count when no filter. */
+    char filter[FAS_ANIM_NAME_LEN];
+    int  visible_animations[FAS_MAX_ANIMATIONS];
+    int  visible_count;
 
     /* Playlist data (loaded from apps_data folder) */
     PlaylistEntry playlists[FAS_MAX_PLAYLISTS];
@@ -132,3 +142,4 @@ bool fas_manifest_backup_exists(FasApp* app);
 bool fas_restore_manifest(FasApp* app);
 bool fas_playlist_exists(FasApp* app, const char* name);
 int  fas_active_playlist_index(FasApp* app);
+void fas_apply_anim_filter(FasApp* app);
