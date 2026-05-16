@@ -28,8 +28,18 @@ void fas_scene_choose_playlist_on_enter(void* context) {
     if(app->playlist_count == 0) {
         fas_list_view_add_item(app->list_view, "No playlists yet", false, false);
     } else {
+        int active = fas_active_playlist_index(app);
         for(int i = 0; i < app->playlist_count; i++) {
-            fas_list_view_add_item(app->list_view, app->playlists[i].name, false, false);
+            char label[FAS_LIST_LABEL_LEN];
+            if(i == active) {
+                snprintf(label, sizeof(label), "%s *", app->playlists[i].name);
+            } else {
+                snprintf(label, sizeof(label), "%s", app->playlists[i].name);
+            }
+            fas_list_view_add_item(app->list_view, label, false, false);
+        }
+        if(active >= 0) {
+            fas_list_view_set_cursor(app->list_view, active);
         }
     }
 

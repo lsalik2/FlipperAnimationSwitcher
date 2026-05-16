@@ -131,3 +131,4 @@ bool fas_manifest_exists(FasApp* app);
 bool fas_manifest_backup_exists(FasApp* app);
 bool fas_restore_manifest(FasApp* app);
 bool fas_playlist_exists(FasApp* app, const char* name);
+int  fas_active_playlist_index(FasApp* app);
