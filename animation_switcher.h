@@ -74,7 +74,15 @@ typedef enum {
     FasEvtRebootNo,
     FasEvtOverwriteYes,
     FasEvtOverwriteNo,
+    FasEvtRestoreYes,
+    FasEvtRestoreNo,
 } FasCustomEvent;
+
+/* ── Reboot-confirm scene state (which operation just finished) ───────── */
+typedef enum {
+    FasRebootSourceApply = 0,
+    FasRebootSourceRestore,
+} FasRebootSource;
 
 /* ── Application context ──────────────────────────────────────────────── */
 typedef struct {
@@ -120,4 +128,6 @@ bool fas_import_manifest(FasApp* app, const char* name);
 bool fas_delete_playlist(FasApp* app, int index);
 bool fas_apply_playlist(FasApp* app, int index);
 bool fas_manifest_exists(FasApp* app);
+bool fas_manifest_backup_exists(FasApp* app);
+bool fas_restore_manifest(FasApp* app);
 bool fas_playlist_exists(FasApp* app, const char* name);
