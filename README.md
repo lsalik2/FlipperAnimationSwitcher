@@ -23,6 +23,7 @@ A Flipper Zero application for creating, managing, and switching **animation pla
 - OK (short) - Toggle checkbox
 - OK (long) - Edit per-animation settings
 - Left - Bulk actions (Select All / Invert / Select None)
+- Left (long) - Filter animations by name (empty = clear filter)
 - Right - Proceed to name entry (requires 1+ selected)
 
 **Create Playlist -- Animation Settings**

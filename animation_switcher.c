@@ -385,6 +385,50 @@ bool fas_apply_playlist(FasApp* app, int index) {
     return (err == FSE_OK);
 }
 
+/**
+ * Rebuild app->visible_animations[] from app->filter.  Empty filter shows
+ * every animation; otherwise rows whose name contains the filter as a
+ * case-insensitive substring are kept (in original order).
+ */
+void fas_apply_anim_filter(FasApp* app) {
+    if(app->filter[0] == '\0') {
+        for(int i = 0; i < app->animation_count; i++) {
+            app->visible_animations[i] = i;
+        }
+        app->visible_count = app->animation_count;
+        return;
+    }
+
+    /* Pre-lowercase the filter once */
+    char needle[FAS_ANIM_NAME_LEN];
+    int  nlen = 0;
+    for(; app->filter[nlen] && nlen < FAS_ANIM_NAME_LEN - 1; nlen++) {
+        char c = app->filter[nlen];
+        if(c >= 'A' && c <= 'Z') c += 32;
+        needle[nlen] = c;
+    }
+    needle[nlen] = '\0';
+
+    app->visible_count = 0;
+    for(int i = 0; i < app->animation_count; i++) {
+        const char* hay = app->animations[i].name;
+        bool match = false;
+        for(int s = 0; hay[s]; s++) {
+            int k = 0;
+            while(k < nlen && hay[s + k]) {
+                char h = hay[s + k];
+                if(h >= 'A' && h <= 'Z') h += 32;
+                if(h != needle[k]) break;
+                k++;
+            }
+            if(k == nlen) { match = true; break; }
+        }
+        if(match) {
+            app->visible_animations[app->visible_count++] = i;
+        }
+    }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
  * Entry point
  * ═══════════════════════════════════════════════════════════════════════ */
