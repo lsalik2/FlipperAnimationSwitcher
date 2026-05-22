@@ -19,6 +19,7 @@
 #define FAS_PLAYLISTS_PATH      "/ext/apps_data/animation_switcher"
 #define FAS_MANIFEST_PATH       "/ext/dolphin/manifest.txt"
 #define FAS_MANIFEST_BACKUP_PATH "/ext/dolphin/manifest.txt.bak"
+#define FAS_CONFIG_PATH         "/ext/apps_data/animation_switcher/config.txt"
 
 /* ── Limits ───────────────────────────────────────────────────────────── */
 #define FAS_MAX_ANIMATIONS    128 // TODO Maybe increase this if possible?
@@ -48,6 +49,17 @@ typedef struct {
 typedef struct {
     char name[FAS_PLAYLIST_NAME_LEN];
 } PlaylistEntry;
+
+/* Default per-animation values used when adding a fresh entry.  Persisted
+ * to FAS_CONFIG_PATH; loaded at app start and re-saved when the user
+ * leaves the Default Values scene. */
+typedef struct {
+    int min_butthurt;
+    int max_butthurt;
+    int min_level;
+    int max_level;
+    int weight;
+} FasDefaults;
 
 /* ── View IDs ─────────────────────────────────────────────────────────── */
 typedef enum {
@@ -132,6 +144,10 @@ typedef struct {
     /* Flag: PlaylistName scene saves an imported manifest instead of the
      * currently-selected animations when true. */
     bool import_mode;
+
+    /* User-configurable defaults applied to each animation in
+     * fas_load_animations(). */
+    FasDefaults defaults;
 } FasApp;
 
 /* ── Storage helpers (implemented in animation_switcher.c) ────── */
@@ -147,3 +163,5 @@ bool fas_restore_manifest(FasApp* app);
 bool fas_playlist_exists(FasApp* app, const char* name);
 int  fas_active_playlist_index(FasApp* app);
 void fas_apply_anim_filter(FasApp* app);
+void fas_load_config(FasApp* app);
+bool fas_save_config(FasApp* app);
