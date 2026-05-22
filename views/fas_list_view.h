@@ -12,6 +12,7 @@ typedef enum {
     FasListEvtOkShort,  /* OK pressed briefly (toggles checkbox if present) */
     FasListEvtOkLong,   /* OK held                                          */
     FasListEvtRight,    /* Right arrow pressed                              */
+    FasListEvtLeft,     /* Left arrow pressed                               */
 } FasListEvent;
 
 typedef void (*FasListCallback)(void* context, int index, FasListEvent event);

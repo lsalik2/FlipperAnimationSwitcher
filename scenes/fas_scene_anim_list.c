@@ -24,6 +24,15 @@ static void fas_anim_list_cb(void* context, int index, FasListEvent event) {
         view_dispatcher_send_custom_event(app->view_dispatcher, FasEvtAnimListDone);
         break;
 
+    case FasListEvtLeft:
+        /* Open bulk-actions dialog.  Set flag so on_enter preserves state. */
+        if(app->animation_count > 0) {
+            app->returning_from_settings = true;
+            view_dispatcher_send_custom_event(
+                app->view_dispatcher, FasEvtAnimListBulkActions);
+        }
+        break;
+
     default:
         break;
     }
@@ -84,6 +93,11 @@ bool fas_scene_anim_list_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         }
+
+        case FasEvtAnimListBulkActions:
+            scene_manager_next_scene(app->scene_manager, FasSceneBulkActions);
+            consumed = true;
+            break;
 
         default:
             break;

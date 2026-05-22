@@ -76,6 +76,10 @@ typedef enum {
     FasEvtOverwriteNo,
     FasEvtRestoreYes,
     FasEvtRestoreNo,
+    FasEvtAnimListBulkActions,
+    FasEvtBulkSelectAll,
+    FasEvtBulkSelectNone,
+    FasEvtBulkInvert,
 } FasCustomEvent;
 
 /* ── Reboot-confirm scene state (which operation just finished) ───────── */
