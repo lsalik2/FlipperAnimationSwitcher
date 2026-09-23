@@ -68,3 +68,9 @@ dist/
 
 # TODO file
 TODO
+
+# Design specs (local only)
+docs/specs/
+
+# Implementation plans (local only)
+docs/plans/
