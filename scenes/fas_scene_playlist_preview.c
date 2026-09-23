@@ -1,6 +1,8 @@
 #include "../animation_switcher.h"
 #include "fas_scene.h"
 
+#include <stdlib.h>
+
 /* ── Read the playlist .txt and build a display string ─────────────────── */
 static void build_preview_text(FasApp* app, char* out, int out_size) {
     char path[FAS_PATH_LEN];
@@ -16,11 +18,19 @@ static void build_preview_text(FasApp* app, char* out, int out_size) {
     }
 
     /* Reserve tail space for a "...and N more" line so we never truncate
-     * mid-name. Each name takes up to ~70 bytes when rendered. */
-    const int tail_reserve = 32;
+     * mid-name. Each name takes up to ~70 bytes when rendered.
+     *
+     * Names are written from offset `header_reserve` so the stats header
+     * (computed during the same scan) can be back-filled and the names
+     * shifted into their final position with a single memmove. */
+    const int tail_reserve   = 32;
+    const int header_reserve = 64;
     int  pos        = 0;
-    int  total      = 0; /* total Name: entries seen */
-    int  rendered   = 0; /* entries written to out */
+    int  total      = 0;
+    int  rendered   = 0;
+    int  bh_min = 0, bh_max = 0;
+    int  lv_min = 0, lv_max = 0;
+    bool stats_seen = false;
     char line[128];
     int  lp  = 0;
     char c;
@@ -30,14 +40,29 @@ static void build_preview_text(FasApp* app, char* out, int out_size) {
             line[lp] = '\0';
             if(strncmp(line, "Name: ", 6) == 0) {
                 total++;
-                if(pos < out_size - tail_reserve - 80) {
+                if(header_reserve + pos < out_size - tail_reserve - 80) {
                     int written = snprintf(
-                        out + pos, out_size - pos, "- %s\n", line + 6);
+                        out + header_reserve + pos,
+                        out_size - header_reserve - pos,
+                        "- %s\n", line + 6);
                     if(written > 0) {
                         pos += written;
                         rendered++;
                     }
                 }
+            } else if(strncmp(line, "Min butthurt: ", 14) == 0) {
+                int v = atoi(line + 14);
+                if(!stats_seen || v < bh_min) bh_min = v;
+            } else if(strncmp(line, "Max butthurt: ", 14) == 0) {
+                int v = atoi(line + 14);
+                if(!stats_seen || v > bh_max) bh_max = v;
+            } else if(strncmp(line, "Min level: ", 11) == 0) {
+                int v = atoi(line + 11);
+                if(!stats_seen || v < lv_min) lv_min = v;
+            } else if(strncmp(line, "Max level: ", 11) == 0) {
+                int v = atoi(line + 11);
+                if(!stats_seen || v > lv_max) lv_max = v;
+                stats_seen = true;
             }
             lp = 0;
         } else if(lp < (int)sizeof(line) - 1) {
@@ -49,9 +74,11 @@ static void build_preview_text(FasApp* app, char* out, int out_size) {
         line[lp] = '\0';
         if(strncmp(line, "Name: ", 6) == 0) {
             total++;
-            if(pos < out_size - tail_reserve - 80) {
+            if(header_reserve + pos < out_size - tail_reserve - 80) {
                 int written = snprintf(
-                    out + pos, out_size - pos, "- %s\n", line + 6);
+                    out + header_reserve + pos,
+                    out_size - header_reserve - pos,
+                    "- %s\n", line + 6);
                 if(written > 0) {
                     pos += written;
                     rendered++;
@@ -60,15 +87,34 @@ static void build_preview_text(FasApp* app, char* out, int out_size) {
         }
     }
 
-    if(rendered < total) {
-        snprintf(out + pos, out_size - pos,
-                 "...and %d more\n", total - rendered);
-    }
-
-    if(total == 0) snprintf(out, out_size, "(empty playlist)");
-
     storage_file_close(f);
     storage_file_free(f);
+
+    if(total == 0) {
+        snprintf(out, out_size, "(empty playlist)");
+        return;
+    }
+
+    if(rendered < total) {
+        int written = snprintf(out + header_reserve + pos,
+                               out_size - header_reserve - pos,
+                               "...and %d more\n", total - rendered);
+        if(written > 0) pos += written;
+    }
+
+    /* Compose stats header, then shift the names into final position. */
+    char header[64];
+    int  header_len = snprintf(
+        header, sizeof(header),
+        "%d %s\nBH %d-%d  LV %d-%d\n\n",
+        total, total == 1 ? "anim" : "anims",
+        bh_min, bh_max, lv_min, lv_max);
+    if(header_len < 0) header_len = 0;
+    if(header_len >= (int)sizeof(header)) header_len = (int)sizeof(header) - 1;
+
+    memmove(out + header_len, out + header_reserve, pos);
+    memcpy(out, header, header_len);
+    out[header_len + pos] = '\0';
 }
 
 /* ── Scene handlers ───────────────────────────────────────────────────── */

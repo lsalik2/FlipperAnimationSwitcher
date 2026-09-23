@@ -6,6 +6,7 @@ A Flipper Zero application for creating, managing, and switching **animation pla
 
 - **Create Playlist** - Select animations, optionally fine-tune per-animation settings, then save as a named playlist.
 - **Choose Playlist** - Apply a saved playlist (overwrites manifest.txt).
+- **Restore Backup** - Restore the previously-active manifest from manifest.txt.bak.
 - **Backup Playlist** - Snapshot the active animation set (/ext/dolphin/manifest.txt) as a named playlist.
 - **Delete Playlist** - Remove any saved playlist.
 - **About / Help** - App info and help section.
@@ -59,5 +60,13 @@ Install and run ufbt - instructions on its official [GitHub page](https://github
 
 ## Roadmap
 
+- Restore the previous manifest from `manifest.txt.bak` via a menu entry
+- Edit an existing playlist instead of having to recreate it
+- Mark the currently-applied playlist in the Choose list
+- Bulk select / deselect / invert in the animation list
+- Shuffle: generate a random playlist of N animations
 - Animation previewer screen
+- Search / filter animations by name in the Create flow
+- Configurable default values for new animation selections
+- Show playlist stats (count, butthurt/level coverage) in the preview
 - Increase maximum animation count beyond 128
