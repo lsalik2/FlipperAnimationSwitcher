@@ -11,6 +11,7 @@
 #include <gui/modules/text_input.h>
 #include <gui/modules/widget.h>
 #include <gui/modules/dialog_ex.h>
+#include <gui/modules/submenu.h>
 #include <storage/storage.h>
 #include "views/fas_list_view.h"
 
@@ -69,6 +70,7 @@ typedef enum {
     FasViewTextInput, /* TextInput (playlist name)        */
     FasViewWidget,    /* Widget (about, preview)          */
     FasViewDialogEx,  /* DialogEx (confirmations)         */
+    FasViewSubmenu,   /* Submenu (bulk actions)           */
 } FasView;
 
 /* ── Custom events sent through the view dispatcher ──────────────────── */
@@ -116,6 +118,7 @@ typedef struct {
     TextInput*         text_input;
     Widget*            widget;
     DialogEx*          dialog_ex;
+    Submenu*           submenu;
 
     /* Animation data (loaded from /ext/dolphin) */
     AnimEntry animations[FAS_MAX_ANIMATIONS];

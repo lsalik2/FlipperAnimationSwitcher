@@ -1,17 +1,23 @@
 #include "../animation_switcher.h"
 #include "fas_scene.h"
 
-static void fas_bulk_actions_cb(DialogExResult result, void* context) {
+typedef enum {
+    FasBulkIdxAll = 0,
+    FasBulkIdxNone,
+    FasBulkIdxInvert,
+} FasBulkIdx;
+
+static void fas_bulk_actions_cb(void* context, uint32_t index) {
     FasApp* app = context;
-    switch(result) {
-    case DialogExResultLeft:
+    switch(index) {
+    case FasBulkIdxAll:
         view_dispatcher_send_custom_event(app->view_dispatcher, FasEvtBulkSelectAll);
         break;
-    case DialogExResultCenter:
-        view_dispatcher_send_custom_event(app->view_dispatcher, FasEvtBulkInvert);
-        break;
-    case DialogExResultRight:
+    case FasBulkIdxNone:
         view_dispatcher_send_custom_event(app->view_dispatcher, FasEvtBulkSelectNone);
+        break;
+    case FasBulkIdxInvert:
+        view_dispatcher_send_custom_event(app->view_dispatcher, FasEvtBulkInvert);
         break;
     default:
         break;
@@ -21,26 +27,23 @@ static void fas_bulk_actions_cb(DialogExResult result, void* context) {
 void fas_scene_bulk_actions_on_enter(void* context) {
     FasApp* app = context;
 
+    /* Count against the visible set: bulk actions act on what you can see. */
     int selected = 0;
-    for(int i = 0; i < app->animation_count; i++) {
-        if(app->animations[i].selected) selected++;
+    for(int v = 0; v < app->visible_count; v++) {
+        if(app->animations[app->visible_animations[v]].selected) selected++;
     }
 
-    char body[48];
-    snprintf(body, sizeof(body), "%d / %d selected", selected, app->animation_count);
+    char header[48];
+    snprintf(header, sizeof(header), "Bulk: %d / %d shown",
+             selected, app->visible_count);
 
-    dialog_ex_reset(app->dialog_ex);
-    dialog_ex_set_header(
-        app->dialog_ex, "Bulk Actions", 64, 10, AlignCenter, AlignCenter);
-    dialog_ex_set_text(
-        app->dialog_ex, body, 64, 32, AlignCenter, AlignCenter);
-    dialog_ex_set_left_button_text(app->dialog_ex,   "All");
-    dialog_ex_set_center_button_text(app->dialog_ex, "Invert");
-    dialog_ex_set_right_button_text(app->dialog_ex,  "None");
-    dialog_ex_set_context(app->dialog_ex, app);
-    dialog_ex_set_result_callback(app->dialog_ex, fas_bulk_actions_cb);
+    submenu_reset(app->submenu);
+    submenu_set_header(app->submenu, header);
+    submenu_add_item(app->submenu, "Select All",  FasBulkIdxAll,    fas_bulk_actions_cb, app);
+    submenu_add_item(app->submenu, "Select None", FasBulkIdxNone,   fas_bulk_actions_cb, app);
+    submenu_add_item(app->submenu, "Invert",      FasBulkIdxInvert, fas_bulk_actions_cb, app);
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, FasViewDialogEx);
+    view_dispatcher_switch_to_view(app->view_dispatcher, FasViewSubmenu);
 }
 
 bool fas_scene_bulk_actions_on_event(void* context, SceneManagerEvent event) {
@@ -50,23 +53,24 @@ bool fas_scene_bulk_actions_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case FasEvtBulkSelectAll:
-            for(int i = 0; i < app->animation_count; i++) {
-                app->animations[i].selected = true;
+            for(int v = 0; v < app->visible_count; v++) {
+                app->animations[app->visible_animations[v]].selected = true;
             }
             scene_manager_previous_scene(app->scene_manager);
             consumed = true;
             break;
 
         case FasEvtBulkSelectNone:
-            for(int i = 0; i < app->animation_count; i++) {
-                app->animations[i].selected = false;
+            for(int v = 0; v < app->visible_count; v++) {
+                app->animations[app->visible_animations[v]].selected = false;
             }
             scene_manager_previous_scene(app->scene_manager);
             consumed = true;
             break;
 
         case FasEvtBulkInvert:
-            for(int i = 0; i < app->animation_count; i++) {
+            for(int v = 0; v < app->visible_count; v++) {
+                int i = app->visible_animations[v];
                 app->animations[i].selected = !app->animations[i].selected;
             }
             scene_manager_previous_scene(app->scene_manager);
@@ -82,5 +86,5 @@ bool fas_scene_bulk_actions_on_event(void* context, SceneManagerEvent event) {
 
 void fas_scene_bulk_actions_on_exit(void* context) {
     FasApp* app = context;
-    dialog_ex_reset(app->dialog_ex);
+    submenu_reset(app->submenu);
 }

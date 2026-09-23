@@ -68,6 +68,10 @@ static FasApp* fas_app_alloc(void) {
     view_dispatcher_add_view(
         app->view_dispatcher, FasViewDialogEx, dialog_ex_get_view(app->dialog_ex));
 
+    app->submenu = submenu_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, FasViewSubmenu, submenu_get_view(app->submenu));
+
     /* Attach to GUI as fullscreen app */
     view_dispatcher_attach_to_gui(
         app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
@@ -94,6 +98,9 @@ static void fas_app_free(FasApp* app) {
 
     view_dispatcher_remove_view(app->view_dispatcher, FasViewDialogEx);
     dialog_ex_free(app->dialog_ex);
+
+    view_dispatcher_remove_view(app->view_dispatcher, FasViewSubmenu);
+    submenu_free(app->submenu);
 
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
