@@ -5,6 +5,7 @@
 typedef enum {
     FasMainIdxCreate = 0,
     FasMainIdxChoose,
+    FasMainIdxEdit,
     FasMainIdxRestore,
     FasMainIdxImport,
     FasMainIdxDelete,
@@ -22,10 +23,12 @@ void fas_scene_main_menu_on_enter(void* context) {
     /* Returning to the main menu is the canonical "back to neutral state"
      * point; clear any transient flags here. */
     app->import_mode = false;
+    app->edit_mode   = false;
 
     menu_reset(app->menu);
     menu_add_item(app->menu, "Create Playlist", &I_create, FasMainIdxCreate,  fas_main_menu_cb, app);
     menu_add_item(app->menu, "Choose Playlist", &I_choose, FasMainIdxChoose,  fas_main_menu_cb, app);
+    menu_add_item(app->menu, "Edit Playlist",   &I_create, FasMainIdxEdit,    fas_main_menu_cb, app);
     menu_add_item(app->menu, "Restore Backup",  &I_import, FasMainIdxRestore, fas_main_menu_cb, app);
     menu_add_item(app->menu, "Backup Playlist", &I_import, FasMainIdxImport,  fas_main_menu_cb, app);
     menu_add_item(app->menu, "Delete Playlist", &I_delete, FasMainIdxDelete,   fas_main_menu_cb, app);
@@ -59,6 +62,10 @@ bool fas_scene_main_menu_on_event(void* context, SceneManagerEvent event) {
             break;
         case FasMainIdxChoose:
             scene_manager_next_scene(app->scene_manager, FasSceneChoosePlaylist);
+            consumed = true;
+            break;
+        case FasMainIdxEdit:
+            scene_manager_next_scene(app->scene_manager, FasSceneEditPlaylist);
             consumed = true;
             break;
         case FasMainIdxRestore:

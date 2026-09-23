@@ -63,6 +63,14 @@ void fas_scene_anim_list_on_enter(void* context) {
         fas_load_animations(app);
         app->current_anim_index = 0;
         app->filter[0]          = '\0';
+
+        /* Edit: overlay the saved playlist on top of the fresh disk load.
+         * Order matters -- fas_load_animations() clears every selected flag,
+         * so loading the playlist any earlier would be wiped here. */
+        if(app->edit_mode) {
+            app->edit_missing_count =
+                fas_load_playlist_into_animations(app, app->current_playlist_index);
+        }
     }
     app->returning_from_settings = false;
 

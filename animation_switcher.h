@@ -98,6 +98,8 @@ typedef enum {
     FasEvtAnimFilterDone,
     FasEvtBulkRandom,
     FasEvtRandomCountDone,
+    FasEvtEditSelect,
+    FasEvtEditPreview,
 } FasCustomEvent;
 
 /* ── Reboot-confirm scene state (which operation just finished) ───────── */
@@ -150,6 +152,14 @@ typedef struct {
      * currently-selected animations when true. */
     bool import_mode;
 
+    /* Flag: the create flow was entered to edit an existing playlist.
+     * edit_target holds its name for pre-filling the name scene and for
+     * suppressing the overwrite prompt on an in-place save.
+     * edit_missing_count counts playlist entries with no animation on disk. */
+    bool edit_mode;
+    char edit_target[FAS_PLAYLIST_NAME_LEN];
+    int  edit_missing_count;
+
     /* User-configurable defaults applied to each animation in
      * fas_load_animations(). */
     FasDefaults defaults;
@@ -177,3 +187,9 @@ bool fas_save_config(FasApp* app);
 typedef void (*FasPlaylistEntryCb)(const AnimEntry* entry, void* ctx);
 bool fas_parse_playlist_file(FasApp* app, const char* path,
                              FasPlaylistEntryCb cb, void* ctx);
+
+/* Overlay a saved playlist onto animations[]: clears every selection,
+ * then re-checks and restores per-animation values for each entry that
+ * matches an animation on disk.  Returns the number of entries with no
+ * matching animation. */
+int fas_load_playlist_into_animations(FasApp* app, int index);

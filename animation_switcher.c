@@ -276,6 +276,45 @@ bool fas_parse_playlist_file(
     return true;
 }
 
+typedef struct {
+    FasApp* app;
+    int     missing;
+} LoadCtx;
+
+static void fas_load_entry_cb(const AnimEntry* e, void* ctx) {
+    LoadCtx* l   = ctx;
+    FasApp*  app = l->app;
+
+    for(int i = 0; i < app->animation_count; i++) {
+        if(strncmp(app->animations[i].name, e->name, FAS_ANIM_NAME_LEN) == 0) {
+            app->animations[i].selected     = true;
+            app->animations[i].min_butthurt = e->min_butthurt;
+            app->animations[i].max_butthurt = e->max_butthurt;
+            app->animations[i].min_level    = e->min_level;
+            app->animations[i].max_level    = e->max_level;
+            app->animations[i].weight       = e->weight;
+            return;
+        }
+    }
+    l->missing++; /* playlist names an animation no longer on the SD card */
+}
+
+int fas_load_playlist_into_animations(FasApp* app, int index) {
+    if(index < 0 || index >= app->playlist_count) return 0;
+
+    for(int i = 0; i < app->animation_count; i++) {
+        app->animations[i].selected = false;
+    }
+
+    char path[FAS_PATH_LEN];
+    snprintf(path, sizeof(path), "%s/%s.txt",
+             FAS_PLAYLISTS_PATH, app->playlists[index].name);
+
+    LoadCtx l = { .app = app, .missing = 0 };
+    fas_parse_playlist_file(app, path, fas_load_entry_cb, &l);
+    return l.missing;
+}
+
 bool fas_save_playlist(FasApp* app, const char* name) {
     char path[FAS_PATH_LEN];
     snprintf(path, sizeof(path), "%s/%s.txt", FAS_PLAYLISTS_PATH, name);
