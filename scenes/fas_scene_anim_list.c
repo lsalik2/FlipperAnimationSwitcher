@@ -108,6 +108,16 @@ void fas_scene_anim_list_on_enter(void* context) {
         fas_list_view_set_cursor(app->list_view, cursor_row);
     }
 
+    /* A saved playlist can name an animation whose folder is gone from the
+     * SD card.  Those entries cannot be represented here and would be
+     * dropped on save, so say so rather than losing them silently. */
+    if(app->edit_mode && app->edit_missing_count > 0) {
+        char msg[FAS_LIST_LABEL_LEN];
+        snprintf(msg, sizeof(msg), "! %d missing, will drop",
+                 app->edit_missing_count);
+        fas_list_view_add_item(app->list_view, msg, false, false);
+    }
+
     view_dispatcher_switch_to_view(app->view_dispatcher, FasViewList);
 }
 

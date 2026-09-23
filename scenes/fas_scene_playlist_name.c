@@ -39,6 +39,12 @@ void fas_scene_playlist_name_on_enter(void* context) {
     if(!reentering) {
         memset(app->text_input_buffer, 0, FAS_PLAYLIST_NAME_LEN);
         text_input_reset(app->text_input);
+        /* Editing: start from the playlist's own name so OK overwrites it
+         * in place, and any change saves a copy instead. */
+        if(app->edit_mode) {
+            strncpy(app->text_input_buffer, app->edit_target,
+                    FAS_PLAYLIST_NAME_LEN - 1);
+        }
     }
 
     text_input_set_header_text(app->text_input, "Playlist name:");
@@ -48,7 +54,7 @@ void fas_scene_playlist_name_on_enter(void* context) {
         app,
         app->text_input_buffer,
         FAS_PLAYLIST_NAME_LEN,
-        /*clear_default_text=*/!reentering);
+        /*clear_default_text=*/!reentering && !app->edit_mode);
     text_input_set_validator(
         app->text_input, fas_playlist_name_validator, NULL);
 
@@ -63,7 +69,13 @@ bool fas_scene_playlist_name_on_event(void* context, SceneManagerEvent event) {
         event.event == FasEvtPlaylistNameDone) {
 
         if(strlen(app->text_input_buffer) > 0) {
-            if(fas_playlist_exists(app, app->text_input_buffer)) {
+            /* Editing and keeping the name overwrites the very file the
+             * user chose to edit -- prompting to confirm that is noise. */
+            bool in_place =
+                app->edit_mode &&
+                strcmp(app->text_input_buffer, app->edit_target) == 0;
+
+            if(!in_place && fas_playlist_exists(app, app->text_input_buffer)) {
                 /* Defer the save until the user confirms the overwrite.
                  * Setting state=1 makes on_enter preserve the buffer if the
                  * user backs out of the confirmation. */
