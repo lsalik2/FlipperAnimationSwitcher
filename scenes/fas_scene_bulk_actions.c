@@ -5,6 +5,7 @@ typedef enum {
     FasBulkIdxAll = 0,
     FasBulkIdxNone,
     FasBulkIdxInvert,
+    FasBulkIdxRandom,
 } FasBulkIdx;
 
 static void fas_bulk_actions_cb(void* context, uint32_t index) {
@@ -18,6 +19,9 @@ static void fas_bulk_actions_cb(void* context, uint32_t index) {
         break;
     case FasBulkIdxInvert:
         view_dispatcher_send_custom_event(app->view_dispatcher, FasEvtBulkInvert);
+        break;
+    case FasBulkIdxRandom:
+        view_dispatcher_send_custom_event(app->view_dispatcher, FasEvtBulkRandom);
         break;
     default:
         break;
@@ -42,6 +46,11 @@ void fas_scene_bulk_actions_on_enter(void* context) {
     submenu_add_item(app->submenu, "Select All",  FasBulkIdxAll,    fas_bulk_actions_cb, app);
     submenu_add_item(app->submenu, "Select None", FasBulkIdxNone,   fas_bulk_actions_cb, app);
     submenu_add_item(app->submenu, "Invert",      FasBulkIdxInvert, fas_bulk_actions_cb, app);
+    /* Nothing to roll when the filter matches nothing. */
+    if(app->visible_count > 0) {
+        submenu_add_item(
+            app->submenu, "Random N...", FasBulkIdxRandom, fas_bulk_actions_cb, app);
+    }
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FasViewSubmenu);
 }
@@ -74,6 +83,11 @@ bool fas_scene_bulk_actions_on_event(void* context, SceneManagerEvent event) {
                 app->animations[i].selected = !app->animations[i].selected;
             }
             scene_manager_previous_scene(app->scene_manager);
+            consumed = true;
+            break;
+
+        case FasEvtBulkRandom:
+            scene_manager_next_scene(app->scene_manager, FasSceneRandomCount);
             consumed = true;
             break;
 

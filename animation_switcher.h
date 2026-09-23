@@ -96,6 +96,8 @@ typedef enum {
     FasEvtBulkInvert,
     FasEvtAnimListOpenFilter,
     FasEvtAnimFilterDone,
+    FasEvtBulkRandom,
+    FasEvtRandomCountDone,
 } FasCustomEvent;
 
 /* ── Reboot-confirm scene state (which operation just finished) ───────── */
