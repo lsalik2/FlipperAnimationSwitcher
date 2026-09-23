@@ -201,6 +201,74 @@ bool fas_load_playlists(FasApp* app) {
  * Write a playlist file containing all currently-selected animations.
  * Format mirrors manifest.txt exactly so it can be directly copied over it.
  */
+/* Apply one parsed line to the in-progress block.  A "Name:" line flushes
+ * the previous block and starts a new one seeded from app->defaults. */
+static void fas_parse_playlist_line(
+    FasApp* app, const char* line, AnimEntry* e, bool* have,
+    FasPlaylistEntryCb cb, void* ctx) {
+
+    if(strncmp(line, "Name: ", 6) == 0) {
+        if(*have) cb(e, ctx);
+        memset(e, 0, sizeof(*e));
+        strncpy(e->name, line + 6, FAS_ANIM_NAME_LEN - 1);
+        e->min_butthurt = app->defaults.min_butthurt;
+        e->max_butthurt = app->defaults.max_butthurt;
+        e->min_level    = app->defaults.min_level;
+        e->max_level    = app->defaults.max_level;
+        e->weight       = app->defaults.weight;
+        *have = true;
+        return;
+    }
+    if(!*have) return; /* header lines before the first block */
+
+    if(strncmp(line, "Min butthurt: ", 14) == 0) {
+        e->min_butthurt = atoi(line + 14);
+    } else if(strncmp(line, "Max butthurt: ", 14) == 0) {
+        e->max_butthurt = atoi(line + 14);
+    } else if(strncmp(line, "Min level: ", 11) == 0) {
+        e->min_level = atoi(line + 11);
+    } else if(strncmp(line, "Max level: ", 11) == 0) {
+        e->max_level = atoi(line + 11);
+    } else if(strncmp(line, "Weight: ", 8) == 0) {
+        e->weight = atoi(line + 8);
+    }
+}
+
+bool fas_parse_playlist_file(
+    FasApp* app, const char* path, FasPlaylistEntryCb cb, void* ctx) {
+
+    File* f = storage_file_alloc(app->storage);
+    if(!storage_file_open(f, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        storage_file_free(f);
+        return false;
+    }
+
+    AnimEntry e;
+    bool      have = false;
+    char      line[128];
+    int       lp = 0;
+    char      c;
+
+    while(storage_file_read(f, &c, 1) == 1) {
+        if(c == '\n' || c == '\r') {
+            line[lp] = '\0';
+            fas_parse_playlist_line(app, line, &e, &have, cb, ctx);
+            lp = 0;
+        } else if(lp < (int)sizeof(line) - 1) {
+            line[lp++] = c;
+        }
+    }
+    if(lp > 0) {
+        line[lp] = '\0';
+        fas_parse_playlist_line(app, line, &e, &have, cb, ctx);
+    }
+    if(have) cb(&e, ctx); /* flush trailing block */
+
+    storage_file_close(f);
+    storage_file_free(f);
+    return true;
+}
+
 bool fas_save_playlist(FasApp* app, const char* name) {
     char path[FAS_PATH_LEN];
     snprintf(path, sizeof(path), "%s/%s.txt", FAS_PLAYLISTS_PATH, name);

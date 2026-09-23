@@ -165,3 +165,10 @@ int  fas_active_playlist_index(FasApp* app);
 void fas_apply_anim_filter(FasApp* app);
 void fas_load_config(FasApp* app);
 bool fas_save_config(FasApp* app);
+
+/* Streaming parser for playlist files.  Invokes cb() once per animation
+ * block, including the final block when the file has no trailing newline.
+ * Fields absent from a block fall back to app->defaults. */
+typedef void (*FasPlaylistEntryCb)(const AnimEntry* entry, void* ctx);
+bool fas_parse_playlist_file(FasApp* app, const char* path,
+                             FasPlaylistEntryCb cb, void* ctx);
