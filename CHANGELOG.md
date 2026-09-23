@@ -8,10 +8,11 @@
 
 - Animation previewer screen
 
-## v1.4.0 — Planned
+## v1.4.0
 
-- Edit an existing playlist instead of recreating it
-- Shuffle: generate a random playlist of N animations
+- New "Edit Playlist" menu option loads a saved playlist for editing, then saves it back in place or under a new name
+- New "Random N" bulk action selects a random set of animations
+- Bulk actions (select all / none / invert) now apply only to the animations currently shown by the name filter
 
 ## v1.3.0 — Planned
 
