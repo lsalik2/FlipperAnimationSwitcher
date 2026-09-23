@@ -26,7 +26,7 @@ void fas_scene_bulk_actions_on_enter(void* context) {
         if(app->animations[i].selected) selected++;
     }
 
-    char body[32];
+    char body[48];
     snprintf(body, sizeof(body), "%d / %d selected", selected, app->animation_count);
 
     dialog_ex_reset(app->dialog_ex);

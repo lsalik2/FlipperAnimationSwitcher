@@ -76,7 +76,7 @@ void fas_scene_anim_list_on_enter(void* context) {
     } else if(app->visible_count == 0) {
         /* Filter is set but matches nothing.  Long-press Left to clear it. */
         char msg[FAS_LIST_LABEL_LEN];
-        snprintf(msg, sizeof(msg), "No match for \"%s\"", app->filter);
+        snprintf(msg, sizeof(msg), "No match for \"%.40s\"", app->filter);
         fas_list_view_add_item(app->list_view, msg, false, false);
     } else {
         for(int i = 0; i < app->visible_count; i++) {
