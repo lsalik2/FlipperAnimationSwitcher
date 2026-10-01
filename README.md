@@ -9,7 +9,7 @@ A Flipper Zero application for creating, managing, and switching **animation pla
 - **Restore Backup** - Restore the previously-active manifest from manifest.txt.bak.
 - **Backup Playlist** - Snapshot the active animation set (/ext/dolphin/manifest.txt) as a named playlist.
 - **Delete Playlist** - Remove any saved playlist.
-- **Default Values** - Edit the per-animation defaults used when an entry is added without being customised. Saved to `/ext/apps_data/animation_switcher/config.txt`.
+- **Default Values** - Edit the per-animation defaults used when an entry is added without being customised. Saved to /ext/apps_data/animation_switcher/config.txt.
 - **About / Help** - App info and help section.
 
 ## Controls
@@ -40,7 +40,7 @@ A Flipper Zero application for creating, managing, and switching **animation pla
 
 ## Default Animation Values
 
-When an animation is added without customising its settings, these defaults are used. Edit them via **Default Values** on the main menu; changes apply on the next Create Playlist load and persist in `config.txt`.
+When an animation is added without customising its settings, these defaults are used. Edit them via **Default Values** on the main menu; changes apply on the next Create Playlist load and persist in config.txt.
 
 - Min Butthurt: 0
 - Max Butthurt: 14
@@ -64,13 +64,7 @@ Install and run ufbt - instructions on its official [GitHub page](https://github
 
 ## Roadmap
 
-- Restore the previous manifest from `manifest.txt.bak` via a menu entry
 - Edit an existing playlist instead of having to recreate it
-- Mark the currently-applied playlist in the Choose list
-- Bulk select / deselect / invert in the animation list
 - Shuffle: generate a random playlist of N animations
 - Animation previewer screen
-- Search / filter animations by name in the Create flow
-- Configurable default values for new animation selections
-- Show playlist stats (count, butthurt/level coverage) in the preview
 - Increase maximum animation count beyond 128
