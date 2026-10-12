@@ -14,6 +14,7 @@
 #include <gui/modules/submenu.h>
 #include <storage/storage.h>
 #include "views/fas_list_view.h"
+#include "views/fas_anim_view.h"
 
 /* ── Filesystem paths ─────────────────────────────────────────────────── */
 #define FAS_DOLPHIN_PATH        "/ext/dolphin"
@@ -71,6 +72,7 @@ typedef enum {
     FasViewWidget,    /* Widget (about, preview)          */
     FasViewDialogEx,  /* DialogEx (confirmations)         */
     FasViewSubmenu,   /* Submenu (bulk actions)           */
+    FasViewAnimPreview, /* Custom FasAnimView (previewer) */
 } FasView;
 
 /* ── Custom events sent through the view dispatcher ──────────────────── */
@@ -123,6 +125,7 @@ typedef struct {
     Widget*            widget;
     DialogEx*          dialog_ex;
     Submenu*           submenu;
+    FasAnimView*       anim_view;
 
     /* Animation data (loaded from /ext/dolphin) */
     AnimEntry animations[FAS_MAX_ANIMATIONS];
