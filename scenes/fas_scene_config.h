@@ -1,5 +1,6 @@
 ADD_SCENE(fas, main_menu,         MainMenu)
 ADD_SCENE(fas, anim_list,         AnimList)
+ADD_SCENE(fas, anim_preview,      AnimPreview)
 ADD_SCENE(fas, anim_settings,     AnimSettings)
 ADD_SCENE(fas, bulk_actions,      BulkActions)
 ADD_SCENE(fas, random_count,      RandomCount)

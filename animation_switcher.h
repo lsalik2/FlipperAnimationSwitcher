@@ -102,6 +102,8 @@ typedef enum {
     FasEvtRandomCountDone,
     FasEvtEditSelect,
     FasEvtEditPreview,
+    FasEvtAnimListPreview,
+    FasEvtAnimPreviewTick,
 } FasCustomEvent;
 
 /* ── Reboot-confirm scene state (which operation just finished) ───────── */
@@ -109,6 +111,9 @@ typedef enum {
     FasRebootSourceApply = 0,
     FasRebootSourceRestore,
 } FasRebootSource;
+
+/* Opaque; the preview scene owns the instance.  Defined in anim_player.h. */
+typedef struct FasAnimPlayer FasAnimPlayer;
 
 /* ── Application context ──────────────────────────────────────────────── */
 typedef struct {
@@ -166,6 +171,12 @@ typedef struct {
     /* User-configurable defaults applied to each animation in
      * fas_load_animations(). */
     FasDefaults defaults;
+
+    /* Animation preview scene state.  The player and its roughly 2 KB of
+     * buffers exist only while a preview is on screen. */
+    FasAnimPlayer* anim_player;
+    FuriTimer*     anim_timer;
+    int            anim_position;
 } FasApp;
 
 /* ── Storage helpers (implemented in animation_switcher.c) ────── */
