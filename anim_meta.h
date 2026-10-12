@@ -47,3 +47,25 @@ typedef struct {
  * on device use CRLF.  `out` is fully overwritten on every call, including
  * on failure. */
 FasAnimMetaResult fas_anim_meta_parse(const char* text, size_t len, FasAnimMeta* out);
+
+/* ── .bm container validation ─────────────────────────────────────────── */
+
+#include <stdint.h>
+
+typedef enum {
+    FasAnimBmInvalid = 0,
+    FasAnimBmCompressed, /* 0x01 0x00, LE u16 length, heatshrink payload */
+    FasAnimBmRaw,        /* 0x00, then raw XBM bytes                     */
+} FasAnimBmKind;
+
+/* Classifies a .bm frame container and checks that the length it declares is
+ * actually backed by bytes on disk.
+ *
+ * This exists because compress_icon_decode() takes no input size -- unlike
+ * compress_decode() beside it -- and so trusts the length embedded in the
+ * data.  That is safe for the compiled-in icon assets it was written for, and
+ * unsafe for a file off the SD card: a frame declaring more payload than the
+ * file holds would walk the decoder past the end of the caller's buffer.
+ *
+ * `xbm_bytes` is the decoded frame size the caller expects, ((w+7)/8)*h. */
+FasAnimBmKind fas_anim_bm_validate(const uint8_t* data, size_t size, size_t xbm_bytes);

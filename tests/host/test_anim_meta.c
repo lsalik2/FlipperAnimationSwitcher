@@ -229,6 +229,91 @@ static void test_active_frames_are_ignored(void) {
     CHECK(m.frame_count == 2);
 }
 
+/* ── .bm container validation ──────────────────────────────────────────
+ * compress_icon_decode() takes no input size and trusts the length inside
+ * the data, so these guard the one place untrusted file bytes reach it. */
+
+#define XBM_1024 1024
+
+static void test_bm_accepts_a_real_compressed_header(void) {
+    /* 01 00, declared 818, followed by exactly 818 payload bytes: the shape
+     * the spike confirmed byte-for-byte against a real frame_0.bm. */
+    static uint8_t buf[4 + 818];
+    buf[0] = 0x01;
+    buf[1] = 0x00;
+    buf[2] = (uint8_t)(818 & 0xFF);
+    buf[3] = (uint8_t)(818 >> 8);
+    CHECK(fas_anim_bm_validate(buf, sizeof(buf), XBM_1024) == FasAnimBmCompressed);
+}
+
+/* The attack: a header that claims far more payload than the file holds.
+ * Without this check the decoder reads past the end of the read buffer. */
+static void test_bm_rejects_overlong_declared_length(void) {
+    static uint8_t buf[100];
+    buf[0] = 0x01;
+    buf[1] = 0x00;
+    buf[2] = 0xFF;
+    buf[3] = 0xFF; /* declares 65535 bytes; the file has 96 */
+    CHECK(fas_anim_bm_validate(buf, sizeof(buf), XBM_1024) == FasAnimBmInvalid);
+}
+
+static void test_bm_rejects_declared_length_one_over(void) {
+    static uint8_t buf[64];
+    size_t payload = sizeof(buf) - 4;
+    buf[0] = 0x01;
+    buf[1] = 0x00;
+    buf[2] = (uint8_t)((payload + 1) & 0xFF);
+    buf[3] = (uint8_t)((payload + 1) >> 8);
+    CHECK(fas_anim_bm_validate(buf, sizeof(buf), XBM_1024) == FasAnimBmInvalid);
+}
+
+static void test_bm_tolerates_trailing_padding(void) {
+    static uint8_t buf[64];
+    size_t payload = 40; /* 20 bytes of slack after the payload */
+    buf[0] = 0x01;
+    buf[1] = 0x00;
+    buf[2] = (uint8_t)(payload & 0xFF);
+    buf[3] = (uint8_t)(payload >> 8);
+    CHECK(fas_anim_bm_validate(buf, sizeof(buf), XBM_1024) == FasAnimBmCompressed);
+}
+
+static void test_bm_rejects_empty_payload(void) {
+    static uint8_t buf[4] = {0x01, 0x00, 0x00, 0x00};
+    CHECK(fas_anim_bm_validate(buf, sizeof(buf), XBM_1024) == FasAnimBmInvalid);
+}
+
+static void test_bm_rejects_truncated_header(void) {
+    static uint8_t buf[3] = {0x01, 0x00, 0x10};
+    CHECK(fas_anim_bm_validate(buf, sizeof(buf), XBM_1024) == FasAnimBmInvalid);
+    CHECK(fas_anim_bm_validate(buf, 0, XBM_1024) == FasAnimBmInvalid);
+}
+
+static void test_bm_accepts_uncompressed_frame(void) {
+    static uint8_t buf[1 + XBM_1024];
+    buf[0] = 0x00;
+    CHECK(fas_anim_bm_validate(buf, sizeof(buf), XBM_1024) == FasAnimBmRaw);
+}
+
+/* An uncompressed frame shorter than the image the caller is about to copy
+ * would display whatever happened to be left in the read buffer. */
+static void test_bm_rejects_short_uncompressed_frame(void) {
+    static uint8_t buf[1 + XBM_1024 - 1];
+    buf[0] = 0x00;
+    CHECK(fas_anim_bm_validate(buf, sizeof(buf), XBM_1024) == FasAnimBmInvalid);
+}
+
+static void test_bm_rejects_unknown_container(void) {
+    static uint8_t buf[64];
+    buf[0] = 0x02;
+    CHECK(fas_anim_bm_validate(buf, sizeof(buf), XBM_1024) == FasAnimBmInvalid);
+
+    buf[0] = 0x01;
+    buf[1] = 0x01; /* the packer always writes 01 00 */
+    buf[2] = 0x10;
+    buf[3] = 0x00;
+    CHECK(fas_anim_bm_validate(buf, sizeof(buf), XBM_1024) == FasAnimBmInvalid);
+}
+
 int main(void) {
     RUN(test_real_crlf_file);
     RUN(test_lf_parses_identically);
@@ -240,6 +325,16 @@ int main(void) {
     RUN(test_rejects_unplayable);
     RUN(test_frame_count_is_the_lesser);
     RUN(test_active_frames_are_ignored);
+
+    RUN(test_bm_accepts_a_real_compressed_header);
+    RUN(test_bm_rejects_overlong_declared_length);
+    RUN(test_bm_rejects_declared_length_one_over);
+    RUN(test_bm_tolerates_trailing_padding);
+    RUN(test_bm_rejects_empty_payload);
+    RUN(test_bm_rejects_truncated_header);
+    RUN(test_bm_accepts_uncompressed_frame);
+    RUN(test_bm_rejects_short_uncompressed_frame);
+    RUN(test_bm_rejects_unknown_container);
 
     if(failures == 0) {
         printf("\nAll tests passed.\n");

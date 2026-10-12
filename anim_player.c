@@ -120,6 +120,16 @@ const uint8_t* fas_anim_player_frame(FasAnimPlayer* p, int i) {
 
     if(got != (size_t)size) return NULL;
 
+    /* compress_icon_decode() takes no input size and trusts the length stored
+     * in the data, which is safe for the compiled-in icons it was written for
+     * and not for a file off the SD card.  Validate the container against the
+     * bytes actually read before handing it over. */
+    size_t xbm_bytes =
+        (size_t)((p->meta.width + 7) / 8) * (size_t)p->meta.height;
+    if(fas_anim_bm_validate(p->raw, (size_t)size, xbm_bytes) == FasAnimBmInvalid) {
+        return NULL;
+    }
+
     uint8_t* out = NULL;
     compress_icon_decode(p->decoder, p->raw, &out);
     return out;

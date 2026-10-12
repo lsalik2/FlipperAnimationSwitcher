@@ -120,3 +120,35 @@ FasAnimMetaResult fas_anim_meta_parse(const char* text, size_t len, FasAnimMeta*
 
     return FasAnimMetaOk;
 }
+
+FasAnimBmKind fas_anim_bm_validate(const uint8_t* data, size_t size, size_t xbm_bytes) {
+    if(size < 1) return FasAnimBmInvalid;
+
+    /* This classifier is deliberately stricter than the decoder's own: every
+     * container it accepts must be one the decoder can read without stepping
+     * past `size`.  Anything uncertain is rejected rather than guessed at, so
+     * the two can never disagree about a frame that gets decoded. */
+
+    if(data[0] == 0x00) {
+        /* Uncompressed: raw XBM follows the marker byte, and the caller is
+         * about to copy xbm_bytes out of it. */
+        if(size < 1 + xbm_bytes) return FasAnimBmInvalid;
+        return FasAnimBmRaw;
+    }
+
+    if(data[0] == 0x01) {
+        if(size < 4) return FasAnimBmInvalid;
+        if(data[1] != 0x00) return FasAnimBmInvalid; /* packer always writes 01 00 */
+
+        size_t declared = (size_t)data[2] | ((size_t)data[3] << 8);
+        if(declared == 0) return FasAnimBmInvalid;
+
+        /* Deliberately <=, not ==: trailing padding is harmless, and the
+         * property that matters is that the decoder cannot read past the
+         * bytes actually on disk. */
+        if(declared > size - 4) return FasAnimBmInvalid;
+        return FasAnimBmCompressed;
+    }
+
+    return FasAnimBmInvalid;
+}
