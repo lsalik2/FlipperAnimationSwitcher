@@ -186,6 +186,26 @@ static bool fas_list_input(InputEvent* event, void* context) {
         consumed = true;
     }
 
+    /* ── Right long: preview the highlighted row ──────────────────────── */
+    if(event->type == InputTypeLong && event->key == InputKeyRight) {
+        int             cursor = 0;
+        FasListCallback cb     = NULL;
+        void*           cb_ctx = NULL;
+
+        with_view_model(
+            lv->view,
+            FasListViewModel * m,
+            {
+                cursor = m->cursor;
+                cb     = m->callback;
+                cb_ctx = m->callback_ctx;
+            },
+            false);
+
+        if(cb) cb(cb_ctx, cursor, FasListEvtRightLong);
+        consumed = true;
+    }
+
     /* ── Left short: bulk-actions / secondary action ─────────────────── */
     if(event->type == InputTypeShort && event->key == InputKeyLeft) {
         int             cursor = 0;

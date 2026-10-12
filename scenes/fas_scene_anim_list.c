@@ -49,6 +49,20 @@ static void fas_anim_list_cb(void* context, int index, FasListEvent event) {
             app->view_dispatcher, FasEvtAnimListOpenFilter);
         break;
 
+    case FasListEvtRightLong:
+        /* Preview the highlighted animation.  The bounds check is what keeps
+         * the notice rows out: "No animations found", "No match for ..." and
+         * "! N missing, will drop" are all added past visible_count and name
+         * no animation, so visible_animations[] must not be indexed with
+         * their row. */
+        if(index >= 0 && index < app->visible_count) {
+            app->current_anim_index      = app->visible_animations[index];
+            app->returning_from_settings = true;
+            view_dispatcher_send_custom_event(
+                app->view_dispatcher, FasEvtAnimListPreview);
+        }
+        break;
+
     default:
         break;
     }
@@ -135,6 +149,11 @@ bool fas_scene_anim_list_on_event(void* context, SceneManagerEvent event) {
 
         case FasEvtAnimListOpenFilter:
             scene_manager_next_scene(app->scene_manager, FasSceneAnimFilter);
+            consumed = true;
+            break;
+
+        case FasEvtAnimListPreview:
+            scene_manager_next_scene(app->scene_manager, FasSceneAnimPreview);
             consumed = true;
             break;
 

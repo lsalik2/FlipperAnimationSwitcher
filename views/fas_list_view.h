@@ -9,11 +9,12 @@
 
 /* Events fired via the user callback */
 typedef enum {
-    FasListEvtOkShort,  /* OK pressed briefly (toggles checkbox if present) */
-    FasListEvtOkLong,   /* OK held                                          */
-    FasListEvtRight,    /* Right arrow pressed                              */
-    FasListEvtLeft,     /* Left arrow pressed                               */
-    FasListEvtLeftLong, /* Left held                                        */
+    FasListEvtOkShort,   /* OK pressed briefly (toggles checkbox if present) */
+    FasListEvtOkLong,    /* OK held                                          */
+    FasListEvtRight,     /* Right arrow pressed                              */
+    FasListEvtLeft,      /* Left arrow pressed                               */
+    FasListEvtLeftLong,  /* Left held                                        */
+    FasListEvtRightLong, /* Right held                                       */
 } FasListEvent;
 
 typedef void (*FasListCallback)(void* context, int index, FasListEvent event);
