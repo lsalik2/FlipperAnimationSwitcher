@@ -85,6 +85,15 @@ static FasApp* fas_app_alloc(void) {
 }
 
 static void fas_app_free(FasApp* app) {
+    /* The scene manager goes first.  It is the only thing here that can
+     * still run application code -- a scene's on_exit touches views and the
+     * dispatcher -- so it must not outlive them.  Freeing it first is
+     * ordering that stays correct whether or not the firmware's
+     * scene_manager_free() exits the current scene; the one shipped with
+     * API 87.1 does not, which is the only reason the old order was
+     * harmless. */
+    scene_manager_free(app->scene_manager);
+
     /* Remove views before freeing them */
     view_dispatcher_remove_view(app->view_dispatcher, FasViewMenu);
     menu_free(app->menu);
@@ -111,7 +120,6 @@ static void fas_app_free(FasApp* app) {
     fas_anim_view_free(app->anim_view);
 
     view_dispatcher_free(app->view_dispatcher);
-    scene_manager_free(app->scene_manager);
 
     furi_record_close(RECORD_STORAGE);
     furi_record_close(RECORD_GUI);
