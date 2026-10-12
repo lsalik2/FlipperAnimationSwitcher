@@ -12,6 +12,24 @@ static void fas_anim_preview_timer_cb(void* context) {
     view_dispatcher_send_custom_event(app->view_dispatcher, FasEvtAnimPreviewTick);
 }
 
+/* Arms the next tick.  The timer is deliberately one-shot and re-armed only
+ * once a tick has been handled, so at most one tick is ever in flight.
+ *
+ * A periodic timer would keep firing whether or not the previous frame had
+ * been drawn.  Reading and decoding a frame off the SD card is not bounded
+ * by the frame period, and the dispatcher's custom-event queue holds 16:
+ * once it fills, view_dispatcher_send_custom_event() blocks forever, which
+ * parks the timer-daemon thread.  If the app thread then handled Back, the
+ * furi_timer_free() in on_exit would wait on that same daemon, and the only
+ * thread that could drain the queue is the one doing the waiting.  Pacing
+ * the timer off the handler removes the backlog, and the deadlock with it. */
+static void fas_anim_preview_arm(FasApp* app) {
+    int rate = fas_anim_player_frame_rate(app->anim_player);
+    /* rate is guaranteed 1..FAS_ANIM_RATE_MAX by the parser, so this division
+     * is safe and the period is between 33 and 1000 ms. */
+    furi_timer_start(app->anim_timer, furi_ms_to_ticks(1000u / (uint32_t)rate));
+}
+
 /* Pushes playback position `pos` to the view.  Returns false when the frame
  * could not be read or decoded. */
 static bool fas_anim_preview_show(FasApp* app, int pos) {
@@ -56,14 +74,9 @@ void fas_scene_anim_preview_on_enter(void* context) {
 
         /* A single-frame animation needs no timer at all. */
         if(fas_anim_player_frame_count(app->anim_player) > 1) {
-            int rate = fas_anim_player_frame_rate(app->anim_player);
-            /* rate is guaranteed 1..FAS_ANIM_RATE_MAX by the parser, so this
-             * division is safe and the period is between 33 and 1000 ms. */
-            uint32_t period_ms = 1000u / (uint32_t)rate;
-
             app->anim_timer =
-                furi_timer_alloc(fas_anim_preview_timer_cb, FuriTimerTypePeriodic, app);
-            furi_timer_start(app->anim_timer, furi_ms_to_ticks(period_ms));
+                furi_timer_alloc(fas_anim_preview_timer_cb, FuriTimerTypeOnce, app);
+            fas_anim_preview_arm(app);
         }
         break;
     }
@@ -81,10 +94,13 @@ bool fas_scene_anim_preview_on_event(void* context, SceneManagerEvent event) {
         if(count > 0) {
             app->anim_position = (app->anim_position + 1) % count;
 
-            if(!fas_anim_preview_show(app, app->anim_position)) {
-                /* A frame file vanished or failed to decode mid-playback.
-                 * Stop rather than flicker between good and bad frames. */
-                furi_timer_stop(app->anim_timer);
+            if(fas_anim_preview_show(app, app->anim_position)) {
+                fas_anim_preview_arm(app);
+            } else {
+                /* A frame file vanished, was truncated, or failed to decode
+                 * mid-playback.  Simply not re-arming stops playback -- with
+                 * a one-shot timer there is nothing to cancel, so this path
+                 * cannot touch a timer that was never allocated. */
                 fas_anim_view_set_message(app->anim_view, "Frame read error");
             }
         }

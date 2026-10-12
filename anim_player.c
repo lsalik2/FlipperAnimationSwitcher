@@ -6,8 +6,18 @@
 #include "animation_switcher.h"
 
 struct FasAnimPlayer {
-    Storage*      storage;
-    CompressIcon* decoder;
+    Storage*  storage;
+
+    /* compress_decode() rather than compress_icon_decode(): the icon helper
+     * does not return a status, it furi_check()s the decode and takes the
+     * whole device down with a crash screen.  Its buffer is only
+     * decode_buf_size + 4, so any frame whose payload expands past that --
+     * which a single flipped bit in a heatshrink stream can cause, and SD
+     * cards do get corrupted -- would reboot the Flipper rather than report
+     * a bad frame.  compress_decode() returns false instead, and reports how
+     * many bytes it actually produced. */
+    Compress* decoder;
+    uint8_t*  xbm; /* decode output, FAS_ANIM_XBM_MAX bytes */
 
     /* The raw file buffer is a field, not a local, for two reasons: it keeps
      * a kilobyte off the 4 KB app stack, and compress_icon_decode returns a
@@ -26,17 +36,20 @@ FasAnimPlayer* fas_anim_player_alloc(Storage* storage) {
     memset(p, 0, sizeof(FasAnimPlayer));
 
     p->storage = storage;
-    p->decoder = compress_icon_alloc(FAS_ANIM_XBM_MAX);
+    p->decoder = compress_alloc(CompressTypeHeatshrink, &compress_config_heatshrink_default);
     p->raw     = malloc(FAS_ANIM_FILE_MAX);
+    p->xbm     = malloc(FAS_ANIM_XBM_MAX);
     furi_assert(p->raw);
+    furi_assert(p->xbm);
 
     return p;
 }
 
 void fas_anim_player_free(FasAnimPlayer* p) {
     if(!p) return;
-    compress_icon_free(p->decoder);
+    compress_free(p->decoder);
     free(p->raw);
+    free(p->xbm);
     free(p);
 }
 
@@ -144,7 +157,19 @@ const uint8_t* fas_anim_player_frame(FasAnimPlayer* p, int i) {
 
     if(kind != FasAnimBmCompressed) return NULL;
 
-    uint8_t* out = NULL;
-    compress_icon_decode(p->decoder, p->raw, &out);
-    return out;
+    /* data_in_size is passed honestly, but note the decoder takes the input
+     * length from the container header and ignores it -- which is why
+     * fas_anim_bm_validate() above is still what bounds the read. */
+    size_t decoded = 0;
+    if(!compress_decode(
+           p->decoder, p->raw, (size_t)size, p->xbm, FAS_ANIM_XBM_MAX, &decoded)) {
+        return NULL;
+    }
+
+    /* A stream that ends early decodes "successfully" into a partial buffer.
+     * Without this the view would copy a full frame's worth and paint the
+     * tail of whatever the previous frame left behind. */
+    if(decoded != xbm_bytes) return NULL;
+
+    return p->xbm;
 }
