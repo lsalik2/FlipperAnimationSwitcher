@@ -4,9 +4,10 @@
 
 - Increase maximum animation count beyond 128 (heap-allocated animations array)
 
-## v1.5.0 — Planned
+## v1.5.0
 
-- Animation previewer screen
+- Preview any animation full-screen from the Create or Edit animation list by holding Right
+- Playback follows the frame rate declared by the animation and loops until you press Back
 
 ## v1.4.0
 

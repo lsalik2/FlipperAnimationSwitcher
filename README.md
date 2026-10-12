@@ -27,6 +27,7 @@ A Flipper Zero application for creating, managing, and switching **animation pla
 - Left - Bulk actions (Select All / Select None / Invert / Random N), applied to the animations currently shown
 - Left (long) - Filter animations by name (empty = clear filter)
 - Right - Proceed to name entry (requires 1+ selected)
+- Right (long) - Preview the highlighted animation full-screen (Back returns)
 
 **Create Playlist -- Animation Settings**
 - Up / Down - Navigate settings
