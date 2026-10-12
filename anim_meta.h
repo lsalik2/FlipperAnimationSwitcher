@@ -19,7 +19,8 @@
 #define FAS_ANIM_META_MAX 1024                   /* bytes of meta.txt read */
 
 /* Cap on parsed "Frames order" entries.  A longer animation is truncated
- * to the first FAS_ANIM_MAX_FRAMES rather than rejected. */
+ * to the first FAS_ANIM_MAX_FRAMES rather than rejected, so a preview of a
+ * very long animation shows its opening and loops. */
 #define FAS_ANIM_MAX_FRAMES 64
 
 #define FAS_ANIM_RATE_DEFAULT 2
@@ -30,7 +31,8 @@ typedef enum {
     FasAnimMetaBadFiletype,
     FasAnimMetaNoPassiveFrames,
     FasAnimMetaNoFramesOrder,
-    FasAnimMetaUnsupportedSize,
+    FasAnimMetaUnsupportedSize, /* declared larger than the screen         */
+    FasAnimMetaNoSize,          /* no size declared, or a non-positive one */
 } FasAnimMetaResult;
 
 typedef struct {
@@ -39,7 +41,6 @@ typedef struct {
     int  frame_rate;  /* always 1..FAS_ANIM_RATE_MAX once parsing succeeds */
     int  frame_count; /* usable passive frames                             */
     int  order[FAS_ANIM_MAX_FRAMES];
-    bool order_truncated;
 } FasAnimMeta;
 
 /* Parses the text of a meta.txt.  `text` need not be NUL-terminated; `len`
@@ -47,6 +48,13 @@ typedef struct {
  * on device use CRLF.  `out` is fully overwritten on every call, including
  * on failure. */
 FasAnimMetaResult fas_anim_meta_parse(const char* text, size_t len, FasAnimMeta* out);
+
+/* Length of the prefix of `text` that ends on a line boundary.  Only a
+ * bounded prefix of a meta.txt is ever read, so a longer file arrives with
+ * its final line cut at an arbitrary byte; trimming to the last complete
+ * line keeps a half-line from being parsed as a whole one.  Returns 0 when
+ * there is no complete line. */
+size_t fas_anim_meta_whole_lines(const char* text, size_t len);
 
 /* ── .bm container validation ─────────────────────────────────────────── */
 

@@ -1,5 +1,6 @@
 #include "anim_meta.h"
 
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -42,6 +43,21 @@ static int meta_int(const char* v, size_t vlen, int fallback) {
     char* endp = NULL;
     long  n    = strtol(buf, &endp, 10);
     if(endp == buf) return fallback;
+
+    /* Saturate instead of casting.  `long` is 64-bit on the host that runs
+     * tests/host and 32-bit on the device, so a value past INT_MAX used to
+     * wrap on one and saturate on the other: "Width: 4294967424" wrapped to
+     * a perfectly valid-looking 128 on the host while the device read
+     * INT_MAX and refused it.  Agreeing here is what lets the host suite
+     * stand as an oracle for device behaviour.
+     *
+     * The guard keeps the device build warning-free: there, LONG_MAX and
+     * INT_MAX are the same value, strtol already saturates, and an
+     * unguarded comparison would be a constant-false -Wtype-limits error. */
+#if LONG_MAX > INT_MAX
+    if(n > (long)INT_MAX) return INT_MAX;
+    if(n < (long)INT_MIN) return INT_MIN;
+#endif
     return (int)n;
 }
 
@@ -83,8 +99,15 @@ FasAnimMetaResult fas_anim_meta_parse(const char* text, size_t len, FasAnimMeta*
             out->frame_rate = meta_int(v, vlen, FAS_ANIM_RATE_DEFAULT);
 
         } else if((v = meta_value(line, llen, "Frames order", &vlen)) != NULL) {
-            order_seen = true;
-            size_t i   = 0;
+            /* Last one wins, as it does for every other key in this format.
+             * Appending would splice two lists into one animation that
+             * matches neither.  The array is cleared rather than just
+             * rewound so no entry outlives the list it came from. */
+            order_seen  = true;
+            order_count = 0;
+            memset(out->order, 0, sizeof(out->order));
+
+            size_t i = 0;
             while(i < vlen) {
                 while(i < vlen && (v[i] == ' ' || v[i] == '\t')) i++;
                 if(i >= vlen) break;
@@ -92,10 +115,10 @@ FasAnimMetaResult fas_anim_meta_parse(const char* text, size_t len, FasAnimMeta*
                 size_t start = i;
                 while(i < vlen && v[i] != ' ' && v[i] != '\t') i++;
 
+                /* Entries past the cap are dropped; frame_count below is
+                 * what bounds playback. */
                 if(order_count < FAS_ANIM_MAX_FRAMES) {
                     out->order[order_count++] = meta_int(v + start, i - start, 0);
-                } else {
-                    out->order_truncated = true;
                 }
             }
         }
@@ -104,9 +127,16 @@ FasAnimMetaResult fas_anim_meta_parse(const char* text, size_t len, FasAnimMeta*
     if(!filetype_ok) return FasAnimMetaBadFiletype;
 
     /* Checked before anything else about frames: the render view's buffer is
-     * sized for exactly FAS_ANIM_MAX_W x FAS_ANIM_MAX_H. */
-    if(out->width <= 0 || out->height <= 0 || out->width > FAS_ANIM_MAX_W ||
-       out->height > FAS_ANIM_MAX_H) {
+     * sized for exactly FAS_ANIM_MAX_W x FAS_ANIM_MAX_H.
+     *
+     * Absent and oversize are reported separately because they reach the
+     * user as different sentences.  "Unsupported size" claims the animation
+     * is too big for the screen; a meta.txt that never declared a size, or
+     * declared a nonsensical one, has made no such claim and belongs with
+     * the rest of the unplayable cases. */
+    if(out->width <= 0 || out->height <= 0) return FasAnimMetaNoSize;
+
+    if(out->width > FAS_ANIM_MAX_W || out->height > FAS_ANIM_MAX_H) {
         return FasAnimMetaUnsupportedSize;
     }
 
@@ -119,6 +149,11 @@ FasAnimMetaResult fas_anim_meta_parse(const char* text, size_t len, FasAnimMeta*
     if(out->frame_rate > FAS_ANIM_RATE_MAX) out->frame_rate = FAS_ANIM_RATE_MAX;
 
     return FasAnimMetaOk;
+}
+
+size_t fas_anim_meta_whole_lines(const char* text, size_t len) {
+    while(len > 0 && text[len - 1] != '\n' && text[len - 1] != '\r') len--;
+    return len;
 }
 
 FasAnimBmKind fas_anim_bm_validate(const uint8_t* data, size_t size, size_t xbm_bytes) {

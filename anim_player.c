@@ -65,6 +65,8 @@ FasAnimOpenResult fas_anim_player_open(FasAnimPlayer* p, const char* anim_name) 
         return FasAnimErrNoMeta;
     }
 
+    uint64_t fsize = storage_file_size(f);
+
     /* Reuse the frame buffer: nothing has been decoded yet, and this avoids
      * a second kilobyte of heap for the lifetime of the player. */
     size_t n = storage_file_read(f, p->raw, FAS_ANIM_META_MAX);
@@ -73,12 +75,27 @@ FasAnimOpenResult fas_anim_player_open(FasAnimPlayer* p, const char* anim_name) 
 
     if(n == 0) return FasAnimErrNoMeta;
 
+    /* Only the first FAS_ANIM_META_MAX bytes are read, so a longer meta.txt
+     * arrives with its last line cut at an arbitrary byte.  Cut inside a
+     * "Frames order" list that would have previewed a silently shortened
+     * animation; cut inside any other key it would have reported a value
+     * that is not the one in the file.  Drop the partial line instead. */
+    if(fsize > FAS_ANIM_META_MAX) {
+        n = fas_anim_meta_whole_lines((const char*)p->raw, n);
+        if(n == 0) return FasAnimErrCannotPreview;
+    }
+
     switch(fas_anim_meta_parse((const char*)p->raw, n, &p->meta)) {
     case FasAnimMetaOk:
         break;
     case FasAnimMetaUnsupportedSize:
         return FasAnimErrUnsupported;
     default:
+        /* BadFiletype, NoPassiveFrames, NoFramesOrder and NoSize.  A
+         * meta.txt with no size declared deliberately lands here rather
+         * than on "Unsupported size", which would tell the user their
+         * animation is too big for the screen when it never said how big
+         * it is. */
         return FasAnimErrCannotPreview;
     }
 

@@ -54,7 +54,6 @@ static void test_real_crlf_file(void) {
     CHECK(m.order[0] == 0);
     /* The last entry is the one a stray '\r' would corrupt. */
     CHECK(m.order[15] == 15);
-    CHECK(m.order_truncated == false);
 }
 
 static void test_lf_parses_identically(void) {
@@ -103,14 +102,6 @@ static void test_oversize_refused(void) {
         "Passive frames: 1\r\n"
         "Frames order: 0\r\n";
     CHECK(PARSE(tall, m) == FasAnimMetaUnsupportedSize);
-
-    const char* zero =
-        "Filetype: Flipper Animation\r\n"
-        "Width: 0\r\n"
-        "Height: 64\r\n"
-        "Passive frames: 1\r\n"
-        "Frames order: 0\r\n";
-    CHECK(PARSE(zero, m) == FasAnimMetaUnsupportedSize);
 }
 
 /* Review Focus 3: a long Frames order truncates, it does not overflow.
@@ -132,8 +123,11 @@ static void test_frames_order_truncates(void) {
 
     FasAnimMeta m;
     CHECK(fas_anim_meta_parse(t, strlen(t), &m) == FasAnimMetaOk);
-    CHECK(m.order_truncated == true);
     CHECK(m.frame_count == FAS_ANIM_MAX_FRAMES);
+    /* Exactly the first FAS_ANIM_MAX_FRAMES entries were stored: parsing
+     * neither stopped early nor ran past the end of order[]. */
+    CHECK(m.order[0] == 0);
+    CHECK(m.order[FAS_ANIM_MAX_FRAMES - 1] == (FAS_ANIM_MAX_FRAMES - 1) % 16);
 }
 
 /* Review Focus 4: the frame rate feeds a timer period of 1000/rate. */
@@ -314,6 +308,134 @@ static void test_bm_rejects_unknown_container(void) {
     CHECK(fas_anim_bm_validate(buf, sizeof(buf), XBM_1024) == FasAnimBmInvalid);
 }
 
+/* ── Deferred-minor fixes ──────────────────────────────────────────────── */
+
+/* A key given twice should mean what it means everywhere else in this
+ * format -- the last one wins.  Appending instead would splice two lists
+ * into one animation that matches neither. */
+static void test_duplicate_frames_order_last_wins(void) {
+    const char* t =
+        "Filetype: Flipper Animation\r\n"
+        "Width: 128\r\nHeight: 64\r\nPassive frames: 16\r\nFrame rate: 5\r\n"
+        "Frames order: 0 1 2 3\r\n"
+        "Frames order: 7 8\r\n";
+    FasAnimMeta m;
+    CHECK(PARSE(t, m) == FasAnimMetaOk);
+    CHECK(m.frame_count == 2);
+    CHECK(m.order[0] == 7);
+    CHECK(m.order[1] == 8);
+}
+
+/* A long first list followed by a short one: appending would leave 64
+ * entries in place and play the wrong frames. */
+static void test_duplicate_frames_order_replaces_a_long_list(void) {
+    char t[2048];
+    int  n = snprintf(t, sizeof(t),
+                      "Filetype: Flipper Animation\r\n"
+                      "Width: 128\r\nHeight: 64\r\n"
+                      "Passive frames: 200\r\nFrame rate: 5\r\n"
+                      "Frames order:");
+    for(int i = 0; i < 200; i++) {
+        n += snprintf(t + n, sizeof(t) - (size_t)n, " %d", i % 16);
+    }
+    n += snprintf(t + n, sizeof(t) - (size_t)n, "\r\nFrames order: 3 4 5\r\n");
+
+    FasAnimMeta m;
+    CHECK(fas_anim_meta_parse(t, strlen(t), &m) == FasAnimMetaOk);
+    CHECK(m.frame_count == 3);
+    CHECK(m.order[0] == 3);
+    CHECK(m.order[2] == 5);
+    /* The first list's entries must not survive past the second's end. */
+    CHECK(m.order[3] == 0);
+    CHECK(m.order[FAS_ANIM_MAX_FRAMES - 1] == 0);
+}
+
+/* Minor 2: `long` is 64-bit on this host and 32-bit on the device, so a
+ * value past INT32 wrapped on one and saturated on the other -- meaning
+ * this suite was not a faithful oracle for exactly the inputs it exists
+ * to pin down.  Clamping makes both agree.
+ *
+ * 4294967424 is 2^32 + 128: wrapping it through int yields 128, so the
+ * host used to accept this as a valid full-screen animation. */
+static void test_out_of_int_range_saturates(void) {
+    FasAnimMeta m;
+
+    const char* wide =
+        "Filetype: Flipper Animation\r\n"
+        "Width: 4294967424\r\nHeight: 64\r\n"
+        "Passive frames: 1\r\nFrames order: 0\r\n";
+    CHECK(PARSE(wide, m) == FasAnimMetaUnsupportedSize);
+
+    /* 2^32 wraps to 0, which read as "no passive frames" on the host and
+     * as INT32_MAX on the device. */
+    const char* passive =
+        "Filetype: Flipper Animation\r\n"
+        "Width: 128\r\nHeight: 64\r\n"
+        "Passive frames: 4294967296\r\nFrames order: 0 1\r\n";
+    CHECK(PARSE(passive, m) == FasAnimMetaOk);
+    CHECK(m.frame_count == 2);
+
+    /* Saturating low must stay negative rather than wrapping positive. */
+    const char* negative =
+        "Filetype: Flipper Animation\r\n"
+        "Width: -4294967168\r\nHeight: 64\r\n"
+        "Passive frames: 1\r\nFrames order: 0\r\n";
+    CHECK(PARSE(negative, m) == FasAnimMetaNoSize);
+}
+
+/* Minor 4: "Unsupported size" promises the animation is too big for the
+ * screen.  A meta.txt that never says how big it is has not made that
+ * claim, and the spec's table sends everything else unplayable to
+ * "Cannot preview". */
+static void test_absent_size_is_not_reported_as_oversize(void) {
+    FasAnimMeta m;
+
+    const char* none =
+        "Filetype: Flipper Animation\r\n"
+        "Passive frames: 1\r\nFrames order: 0\r\n";
+    CHECK(PARSE(none, m) == FasAnimMetaNoSize);
+
+    const char* no_height =
+        "Filetype: Flipper Animation\r\n"
+        "Width: 128\r\nPassive frames: 1\r\nFrames order: 0\r\n";
+    CHECK(PARSE(no_height, m) == FasAnimMetaNoSize);
+
+    const char* zero =
+        "Filetype: Flipper Animation\r\n"
+        "Width: 0\r\nHeight: 64\r\nPassive frames: 1\r\nFrames order: 0\r\n";
+    CHECK(PARSE(zero, m) == FasAnimMetaNoSize);
+}
+
+/* Minor 3: only FAS_ANIM_META_MAX bytes of meta.txt are ever read, so a
+ * longer file arrives with its last line cut at an arbitrary byte.  Cut
+ * inside "Frames order" that silently shortened the animation; cut inside
+ * "Filetype" it silently became unpreviewable.  The reader trims to the
+ * last complete line so a half-line is never parsed as a whole one. */
+static void test_whole_lines_drops_a_partial_tail(void) {
+    const char* crlf = "Filetype: Flipper Animation\r\nFrames order: 0 1 2";
+    CHECK(fas_anim_meta_whole_lines(crlf, strlen(crlf)) == 29);
+
+    const char* complete = "Width: 128\r\nHeight: 64\r\n";
+    CHECK(fas_anim_meta_whole_lines(complete, strlen(complete)) == 24);
+
+    const char* lf = "Width: 128\nHeight: 6";
+    CHECK(fas_anim_meta_whole_lines(lf, strlen(lf)) == 11);
+
+    const char* bare_cr = "Width: 128\rHeight: 6";
+    CHECK(fas_anim_meta_whole_lines(bare_cr, strlen(bare_cr)) == 11);
+
+    /* No complete line at all: nothing is safe to parse. */
+    const char* headless = "Filetype: Flipper Anim";
+    CHECK(fas_anim_meta_whole_lines(headless, strlen(headless)) == 0);
+    CHECK(fas_anim_meta_whole_lines("", 0) == 0);
+}
+
+/* Trimming must not change a file that already ends on a line boundary. */
+static void test_whole_lines_is_identity_for_the_real_file(void) {
+    size_t len = strlen(REAL_CRLF);
+    CHECK(fas_anim_meta_whole_lines(REAL_CRLF, len) == len);
+}
+
 int main(void) {
     RUN(test_real_crlf_file);
     RUN(test_lf_parses_identically);
@@ -325,6 +447,13 @@ int main(void) {
     RUN(test_rejects_unplayable);
     RUN(test_frame_count_is_the_lesser);
     RUN(test_active_frames_are_ignored);
+
+    RUN(test_duplicate_frames_order_last_wins);
+    RUN(test_duplicate_frames_order_replaces_a_long_list);
+    RUN(test_out_of_int_range_saturates);
+    RUN(test_absent_size_is_not_reported_as_oversize);
+    RUN(test_whole_lines_drops_a_partial_tail);
+    RUN(test_whole_lines_is_identity_for_the_real_file);
 
     RUN(test_bm_accepts_a_real_compressed_header);
     RUN(test_bm_rejects_overlong_declared_length);
