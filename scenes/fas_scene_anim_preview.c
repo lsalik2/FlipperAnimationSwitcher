@@ -127,7 +127,9 @@ void fas_scene_anim_preview_on_exit(void* context) {
         app->anim_player = NULL;
     }
 
-    /* Release the view's 1 KB frame copy so it is not held while other
-     * scenes run. */
+    /* Clear the frame so the view falls back to drawing its message rather
+     * than a stale image if it is ever shown again before a frame is set.
+     * The model's 1 KB buffer is inline and lives for the life of the app;
+     * this does not return any memory. */
     fas_anim_view_set_frame(app->anim_view, NULL, 0, 0);
 }

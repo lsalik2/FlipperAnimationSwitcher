@@ -20,9 +20,9 @@ struct FasAnimPlayer {
     uint8_t*  xbm; /* decode output, FAS_ANIM_XBM_MAX bytes */
 
     /* The raw file buffer is a field, not a local, for two reasons: it keeps
-     * a kilobyte off the 4 KB app stack, and compress_icon_decode returns a
-     * pointer *into* this buffer for an uncompressed .bm, so it has to
-     * outlive the decoded pointer the caller is handed. */
+     * a kilobyte off the 4 KB app stack, and an uncompressed .bm is handed
+     * back as a pointer *into* this buffer, so it has to outlive the frame
+     * pointer the caller is given. */
     uint8_t* raw;
 
     char        name[FAS_ANIM_NAME_LEN];
@@ -133,10 +133,10 @@ const uint8_t* fas_anim_player_frame(FasAnimPlayer* p, int i) {
 
     if(got != (size_t)size) return NULL;
 
-    /* compress_icon_decode() takes no input size and trusts the length stored
-     * in the data, which is safe for the compiled-in icons it was written for
-     * and not for a file off the SD card.  Validate the container against the
-     * bytes actually read before handing it over. */
+    /* The decoder takes its input length from the header inside the data and
+     * ignores the size it is passed, which is safe for the compiled-in icons
+     * this code path was written for and not for a file off the SD card.
+     * Validate the container against the bytes actually read first. */
     size_t xbm_bytes =
         (size_t)((p->meta.width + 7) / 8) * (size_t)p->meta.height;
     FasAnimBmKind kind = fas_anim_bm_validate(p->raw, (size_t)size, xbm_bytes);
