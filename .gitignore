@@ -74,3 +74,6 @@ docs/specs/
 
 # Implementation plans (local only)
 docs/plans/
+
+# Host test binaries
+tests/host/build/
