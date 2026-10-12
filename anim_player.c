@@ -126,9 +126,23 @@ const uint8_t* fas_anim_player_frame(FasAnimPlayer* p, int i) {
      * bytes actually read before handing it over. */
     size_t xbm_bytes =
         (size_t)((p->meta.width + 7) / 8) * (size_t)p->meta.height;
-    if(fas_anim_bm_validate(p->raw, (size_t)size, xbm_bytes) == FasAnimBmInvalid) {
-        return NULL;
+    FasAnimBmKind kind = fas_anim_bm_validate(p->raw, (size_t)size, xbm_bytes);
+
+    if(kind == FasAnimBmRaw) {
+        /* Hand back the XBM bytes directly instead of routing them through
+         * the decoder, which is what it would do for this container anyway.
+         *
+         * This is what keeps the two readings of the file from ever
+         * disagreeing: the decoder takes no input size, so the only thing it
+         * is ever given here is a container whose declared length has already
+         * been bounded against the bytes on disk.  Were it handed an
+         * uncompressed frame and to dispatch differently than this function
+         * does, it would read a length out of bytes 2 and 3 that nothing has
+         * checked. */
+        return p->raw + 1;
     }
+
+    if(kind != FasAnimBmCompressed) return NULL;
 
     uint8_t* out = NULL;
     compress_icon_decode(p->decoder, p->raw, &out);
